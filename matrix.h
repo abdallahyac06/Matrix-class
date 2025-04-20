@@ -12,7 +12,7 @@
  * transpose, row echelon form (REF), and reduced row echelon form (RREF).
  */
 class Matrix {
-    private:
+    protected:
         /**
          * @brief Number of rows in the matrix.
          */
@@ -35,21 +35,7 @@ class Matrix {
          * @throws std::out_of_range if indices are invalid.
          */
         void checkArgs(int row, int col) const;
-
-        /**
-         * @brief Sets the values of a specific row.
-         * @param row Row index to set.
-         * @param values Array of values to assign to the row.
-         */
-        void setRow(int row, const double* values);
-
-        /**
-         * @brief Sets the values of a specific column.
-         * @param col Column index to set.
-         * @param values Array of values to assign to the column.
-         */
-        void setCol(int col, const double* values);
-
+        
         /**
          * @brief Swaps two rows in the matrix.
          * @param row1 Index of the first row.
@@ -58,26 +44,12 @@ class Matrix {
         void swapRows(int row1, int row2);
 
         /**
-         * @brief Swaps two columns in the matrix.
-         * @param col1 Index of the first column.
-         * @param col2 Index of the second column.
-         */
-        void swapCols(int col1, int col2);
-
-        /**
          * @brief Multiplies a row by a scalar value.
          * @param row Row index to multiply.
          * @param scalar Scalar value to multiply the row by.
          */
         void multiplyRow(int row, double scalar);
-
-        /**
-         * @brief Multiplies a column by a scalar value.
-         * @param col Column index to multiply.
-         * @param scalar Scalar value to multiply the column by.
-         */
-        void multiplyCol(int col, double scalar);
-
+        
         /**
          * @brief Adds a multiple of one row to another row.
          * @param targetRow Index of the row to modify.
@@ -85,15 +57,7 @@ class Matrix {
          * @param scalar Scalar value to multiply the source row by.
          */
         void addMultipleRow(int targetRow, int sourceRow, double scalar);
-
-        /**
-         * @brief Adds a multiple of one column to another column.
-         * @param targetCol Index of the column to modify.
-         * @param sourceCol Index of the column to scale and add.
-         * @param scalar Scalar value to multiply the source column by.
-         */
-        void addMultipleCol(int targetCol, int sourceCol, double scalar);
-
+        
     public:
         /**
          * @brief Constructs a matrix with the specified dimensions.
@@ -109,12 +73,19 @@ class Matrix {
         Matrix(const Matrix &other);
 
         /**
+         * @brief Move Constructor.
+         * @param other Matrix to move from.
+         */
+        Matrix(Matrix &&other);
+
+        /**
          * @brief Constructs a matrix from a 2D array.
-         * @param array Pointer to a 2D array of values.
+         * @param data Pointer to a 2D array of values.
          * @param rows Number of rows in the array.
          * @param cols Number of columns in the array.
          */
-        Matrix(const double** array, int rows, int cols);
+        Matrix(double **data, int rows, int cols);
+
 
         /**
          * @brief Destructor to free allocated memory.
@@ -122,16 +93,36 @@ class Matrix {
         ~Matrix();
 
         /**
+         * @brief Gets the 2D array that represents the matrix.
+         * @return Pointer to a 2D array of values.
+         */
+        double **getData() const;
+        
+        /**
          * @brief Gets the number of rows in the matrix.
          * @return Number of rows.
          */
         int getRows() const;
-
+        
         /**
          * @brief Gets the number of columns in the matrix.
          * @return Number of columns.
          */
         int getCols() const;
+        
+        /**
+         * @brief Sets the values of a specific row.
+         * @param row Row index to set.
+         * @param values Array of values to assign to the row.
+         */
+        void setRow(int row, const double* values);
+
+        /**
+         * @brief Sets the values of a specific column.
+         * @param col Column index to set.
+         * @param values Array of values to assign to the column.
+         */
+        void setCol(int col, const double* values);
 
         /**
          * @brief Retrieves a specific row as an array.
@@ -173,13 +164,6 @@ class Matrix {
          * @return Reference to the current matrix.
          */
         const Matrix &operator=(const Matrix &other);
-
-        /**
-         * @brief Assignment operator to copy from a 2D array.
-         * @param array Pointer to a 2D array of values.
-         * @return Reference to the current matrix.
-         */
-        const Matrix &operator=(const double** array);
 
         /**
          * @brief Adds two matrices.
@@ -267,7 +251,7 @@ class Matrix {
          * @param row Row index.
          * @return Pointer to the element at the specified row.
          */
-        double *operator[](int row);
+        double *&operator[](int row);
 
         /**
          * @brief Accesses an element of the matrix (read-only).
@@ -277,10 +261,10 @@ class Matrix {
         const double *operator[](int row) const;
 
         /**
-         * @brief Converts the matrix to a 2D array.
-         * @return Pointer to the 2D array representation of the matrix.
+         * @brief Checks if the matrix is not a zero matrix.
+         * @return False if the matrix is a zero matrix, true otherwise.
          */
-        operator double**() const;
+        operator bool() const;
 
         /**
          * @brief Multiplies a scalar with a matrix.
@@ -305,27 +289,6 @@ class Matrix {
          * @return Reference to the input stream.
          */
         friend std::istream& operator>>(std::istream& is, Matrix &matrix);
-};
-
-class SquareMatrix: private Matrix {
-    public:
-        SquareMatrix(int = 1);
-        SquareMatrix(const SquareMatrix&);
-        SquareMatrix(double**, int);
-        ~SquareMatrix();
-
-        double trace() const;
-        double determinant() const;
-        SquareMatrix inverse() const;
-        SquareMatrix adjoint() const;
-        bool isLTriangular() const;
-        bool isUTriangular() const;
-        bool isDiagonal() const;
-        bool isSymmetric() const;
-
-    friend Matrix operator*(double, const Matrix&);
-    friend std::ostream& operator<<(std::ostream&, const Matrix&);
-    friend std::istream& operator>>(std::istream&, Matrix&);
 };
 
 #endif
