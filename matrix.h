@@ -90,7 +90,7 @@ class Matrix {
         /**
          * @brief Destructor to free allocated memory.
          */
-        ~Matrix();
+        virtual ~Matrix();
 
         /**
          * @brief Gets the 2D array that represents the matrix.
@@ -151,7 +151,7 @@ class Matrix {
          * @return True if the column is a zero column, false otherwise.
          */
         bool isZeroCol(int col) const;
-
+        
         /**
          * @brief Computes the rank of the matrix.
          * @return Rank of the matrix.
@@ -159,46 +159,92 @@ class Matrix {
         int rank() const;
 
         /**
+         * @brief Computes the transpose of the matrix.
+         * @return Transposed matrix.
+         */
+        const Matrix transpose() const;
+
+        /**
+         * @brief Computes the row echelon form (REF) of the matrix.
+         * @return Matrix in REF.
+         */
+        const Matrix ref() const;
+
+        /**
+         * @brief Computes the reduced row echelon form (RREF) of the matrix.
+         * @param unit Value to use for the leading 1s (default is 1.0).
+         * @return Matrix in RREF.
+         */
+        const Matrix rref(double unit = 1.0) const;
+
+        /**
          * @brief Assignment operator to copy another matrix.
          * @param other Matrix to copy from.
          * @return Reference to the current matrix.
          */
-        const Matrix &operator=(const Matrix &other);
+        Matrix &operator=(const Matrix &other);
 
         /**
          * @brief Adds two matrices.
          * @param other Matrix to add.
          * @return Resulting matrix after addition.
          */
-        Matrix operator+(const Matrix &other) const;
+        const Matrix operator+(const Matrix &other) const;
 
         /**
          * @brief Subtracts another matrix from the current matrix.
          * @param other Matrix to subtract.
          * @return Resulting matrix after subtraction.
          */
-        Matrix operator-(const Matrix &other) const;
+        const Matrix operator-(const Matrix &other) const;
 
         /**
          * @brief Multiplies two matrices.
          * @param other Matrix to multiply with.
          * @return Resulting matrix after multiplication.
          */
-        Matrix operator*(const Matrix &other) const;
+        const Matrix operator*(const Matrix &other) const;
+
+        /**
+         * @brief Multiplies the current matrix by a scalar.
+         * @param scalar Scalar value to multiply with.
+         * @return Resulting matrix after scalar multiplication.
+         */
+        const Matrix operator*(double scalar) const;
 
         /**
          * @brief Adds another matrix to the current matrix (in-place).
          * @param other Matrix to add.
          * @return Reference to the current matrix.
          */
-        const Matrix &operator+=(const Matrix &other);
+        Matrix &operator+=(const Matrix &other);
 
         /**
          * @brief Subtracts another matrix from the current matrix (in-place).
          * @param other Matrix to subtract.
          * @return Reference to the current matrix.
          */
-        const Matrix &operator-=(const Matrix &other);
+        Matrix &operator-=(const Matrix &other);
+
+        /**
+         * @brief Multiplies the current matrix by another matrix (in-place).
+         * @param other Matrix to multiply with.
+         * @return Reference to the current matrix.
+         */
+        Matrix &operator*=(const Matrix &other);
+        
+        /**
+         * @brief Multiplies the current matrix by a scalar (in-place).
+         * @param scalar Scalar value to multiply with.
+         * @return Reference to the current matrix.
+         */
+        Matrix &operator*=(double scalar);
+
+        /**
+         * @brief Negates the matrix.
+         * @return Negated matrix.
+         */
+        const Matrix operator-() const;
 
         /**
          * @brief Checks if two matrices are equal.
@@ -221,42 +267,16 @@ class Matrix {
         bool operator!() const;
 
         /**
-         * @brief Computes the transpose of the matrix.
-         * @return Transposed matrix.
-         */
-        Matrix transpose() const;
-
-        /**
-         * @brief Computes the row echelon form (REF) of the matrix.
-         * @return Matrix in REF.
-         */
-        Matrix ref() const;
-
-        /**
-         * @brief Computes the reduced row echelon form (RREF) of the matrix.
-         * @return Matrix in RREF.
-         */
-        Matrix rref() const;
-
-        /**
-        * @brief Creates a submatrix by removing the specified row and column from the current matrix.
-        * @param row The index of the row to be removed (1-based index).
-        * @param col The index of the column to be removed (1-based index).
-        * @return Matrix A new matrix with the specified row and column removed.
-        */
-        Matrix operator()(int row, int col) const;
-
-        /**
-         * @brief Accesses an element of the matrix (modifiable).
-         * @param row Row index.
-         * @return Pointer to the element at the specified row.
+         * @brief Overloads the subscript operator to provide access to a specific row of the matrix.
+         * @param row The index of the row to access.
+         * @return A reference to a pointer to the first element of the specified row.
          */
         double *&operator[](int row);
-
+        
         /**
-         * @brief Accesses an element of the matrix (read-only).
-         * @param row Row index.
-         * @return Constant pointer to the element at the specified row.
+         * @brief Overloads the subscript operator to provide access to a specific row of the matrix.
+         * @param row The index of the row to access.
+         * @return A pointer to the first element of the specified row.
          */
         const double *operator[](int row) const;
 
@@ -266,29 +286,29 @@ class Matrix {
          */
         operator bool() const;
 
-        /**
-         * @brief Multiplies a scalar with a matrix.
-         * @param scalar Scalar value to multiply.
-         * @param matrix Matrix to multiply with.
-         * @return Resulting matrix after scalar multiplication.
-         */
-        friend Matrix operator*(double scalar, const Matrix &matrix);
+    /**
+     * @brief Multiplies a scalar with a matrix.
+     * @param scalar Scalar value to multiply.
+     * @param matrix Matrix to multiply with.
+     * @return Resulting matrix after scalar multiplication.
+     */
+    friend Matrix operator*(double scalar, const Matrix &matrix);
 
-        /**
-         * @brief Outputs the matrix to an output stream.
-         * @param os Output stream to write to.
-         * @param matrix Matrix to output.
-         * @return Reference to the output stream.
-         */
-        friend std::ostream& operator<<(std::ostream& os, const Matrix &matrix);
+    /**
+     * @brief Outputs the matrix to an output stream.
+     * @param os Output stream to write to.
+     * @param matrix Matrix to output.
+     * @return Reference to the output stream.
+     */
+    friend std::ostream& operator<<(std::ostream& os, const Matrix &matrix);
 
-        /**
-         * @brief Inputs the matrix from an input stream.
-         * @param is Input stream to read from.
-         * @param matrix Matrix to populate.
-         * @return Reference to the input stream.
-         */
-        friend std::istream& operator>>(std::istream& is, Matrix &matrix);
+    /**
+     * @brief Inputs the matrix from an input stream.
+     * @param is Input stream to read from.
+     * @param matrix Matrix to populate.
+     * @return Reference to the input stream.
+     */
+    friend std::istream& operator>>(std::istream& is, Matrix &matrix);
 };
 
 #endif

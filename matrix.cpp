@@ -31,8 +31,8 @@ Matrix::Matrix(double **array, int rows, int cols): Matrix(rows, cols) {
 Matrix::~Matrix() {
     if (data) {
         for (int i = 0; i < ROWS; ++i) {
-                delete[] data[i];
-                data[i] = nullptr;
+            delete[] data[i];
+            data[i] = nullptr;
         }
 
         delete[] data;
@@ -122,6 +122,7 @@ int *Matrix::getCol(int col) const {
     
     return result;
 }
+
 bool Matrix::isZeroRow(int row) const {
     checkArgs(row, 0);
     
@@ -147,7 +148,7 @@ bool Matrix::isZeroCol(int col) const {
 }
 
 int Matrix::rank() const {
-    Matrix rrefMatrix(rref());
+    Matrix rrefMatrix(std::move(rref()));
     int rank = 0;
 
     while (rank < ROWS && !rrefMatrix.isZeroRow(rank)) {
@@ -155,106 +156,9 @@ int Matrix::rank() const {
     }
 
     return rank;
-}
+}    
 
-const Matrix &Matrix::operator=(const Matrix &other) {
-    if (&other == this) {
-        return *this;
-    }
-
-    if (ROWS != other.ROWS || COLS != COLS) {
-        throw std::logic_error("Matrix dimensions must match for assignment.");
-    }
-
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            data[i][j] = other[i][j];
-        }
-    }
-    
-    return *this;
-}
-
-Matrix Matrix::operator+(const Matrix &other) const {
-    if (ROWS != other.ROWS || COLS != other.COLS) {
-        throw std::logic_error("Matrix dimensions must match for addition.");
-    }
-
-    Matrix result(ROWS, COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            result[i][j] = data[i][j] + other[i][j];
-        }
-    }
-    
-    return result;
-}
-
-Matrix Matrix::operator-(const Matrix &other) const {
-    if (ROWS != other.ROWS || COLS != other.COLS) {
-        throw std::logic_error("Matrix dimensions must match for subtraction.");
-    }
-
-    Matrix result(ROWS, COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            result[i][j] = data[i][j] - other[i][j];
-        }
-    }
-    
-    return result;
-}
-
-Matrix Matrix::operator*(const Matrix &other) const {
-    if (COLS != other.ROWS) {
-        throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
-    }
-
-    Matrix result(ROWS, other.COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < other.COLS; ++j) {
-            result[i][j] = 0.0;
-            for (int k = 0; k < COLS; ++k) {
-                result[i][j] += data[i][k] * other[k][j];
-            }
-        }
-    }
-    
-    return result;
-}
-
-const Matrix &Matrix::operator+=(const Matrix &other) {
-    return (*this = this->operator+(other));
-}
-
-const Matrix &Matrix::operator-=(const Matrix &other) {
-    return (*this = this->operator-(other));
-}
-
-bool Matrix::operator==(const Matrix &other) const {
-    if (ROWS != other.ROWS || COLS != other.COLS) {
-        return false;
-    }
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            if (data[i][j] != other[i][j]) {
-                return false;
-            }
-        }
-    }
-    
-    return true;
-}
-
-bool Matrix::operator!=(const Matrix &other) const {
-    return !(this->operator==(other));
-}
-
-bool Matrix::operator!() const {
-    return !(this->operator bool());
-}
-
-Matrix Matrix::transpose() const {
+const Matrix Matrix::transpose() const {
     Matrix result(COLS, ROWS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
@@ -265,7 +169,7 @@ Matrix Matrix::transpose() const {
     return result;
 }
 
-Matrix Matrix::ref() const {
+const Matrix Matrix::ref() const {
     Matrix result(*this);
     int r = 0, r0 = 0, c = 0;
     double pivot;
@@ -298,7 +202,7 @@ Matrix Matrix::ref() const {
     return result;
 }
 
-Matrix Matrix::rref() const {
+const Matrix Matrix::rref(double unit) const {
     Matrix result(*this);
     int r = 0, r0 = 0, c = 0;
 
@@ -313,7 +217,7 @@ Matrix Matrix::rref() const {
         }
 
         result.swapRows(r, r0);
-        result.multiplyRow(r0, 1.0 / result[r0][c]);
+        result.multiplyRow(r0, unit / result[r0][c]);
         for (int i = 0; i < ROWS; ++i) {
             if (result[i][c] && i != r0) {
                 result.addMultipleRow(i, r0, -result[i][c]);
@@ -326,18 +230,127 @@ Matrix Matrix::rref() const {
     return result;
 }
 
-Matrix Matrix::operator()(int row, int col) const {
-    checkArgs(row, col);
+Matrix &Matrix::operator=(const Matrix &other) {
+    if (&other == this) {
+        return *this;
+    }
 
-    Matrix result(ROWS - 1, COLS - 1);
-    int i = 0, j = 0;
-    for (int i = 0; i < ROWS - 1; ++i) {
-        for (int j = 0; j < COLS - 1; ++j) {
-            result[i][j] = data[i + (i >= row)][j + (j >= col)];
-        }
+    if (ROWS != other.ROWS || COLS != other.COLS) {
+        throw std::logic_error("Matrix dimensions must match for assignment.");
+    }    
+
+    for (int i = 0; i < ROWS; ++i) {
+        setRow(i, other[i]);
+    }    
+    
+    return *this;
+}    
+
+const Matrix Matrix::operator+(const Matrix &other) const {
+    if (ROWS != other.ROWS || COLS != other.COLS) {
+        throw std::logic_error("Matrix dimensions must match for addition.");
+    }    
+
+    Matrix result(ROWS, COLS);
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            result[i][j] = data[i][j] + other[i][j];
+        }    
+    }    
+    
+    return result;
+}    
+
+const Matrix Matrix::operator-(const Matrix &other) const {
+    if (ROWS != other.ROWS || COLS != other.COLS) {
+        throw std::logic_error("Matrix dimensions must match for subtraction.");
+    }    
+
+    Matrix result(ROWS, COLS);
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            result[i][j] = data[i][j] - other[i][j];
+        }    
+    }    
+    
+    return result;
+}    
+
+const Matrix Matrix::operator*(const Matrix &other) const {
+    if (COLS != other.ROWS) {
+        throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
+    }    
+
+    Matrix result(ROWS, other.COLS);
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < other.COLS; ++j) {
+            result[i][j] = 0.0;
+            for (int k = 0; k < COLS; ++k) {
+                result[i][j] += data[i][k] * other[k][j];
+            }    
+        }    
+    }    
+    
+    return result;
+}    
+
+const Matrix Matrix::operator*(double scalar) const {
+    Matrix result(ROWS, COLS);
+    for (int i = 0; i < ROWS; ++i) {
+        result.multiplyRow(i, scalar);
+    }    
+    
+    return result;
+}    
+
+Matrix &Matrix::operator+=(const Matrix &other) {
+    return this->operator=(this->operator+(other));
+}    
+
+Matrix &Matrix::operator-=(const Matrix &other) {
+    return this->operator=(this->operator-(other));
+}    
+
+Matrix &Matrix::operator*=(const Matrix &other) {
+    return this->operator=(this->operator*(other));
+}    
+
+Matrix &Matrix::operator*=(double scalar) {
+    return this->operator=(this->operator*(scalar));
+}
+
+const Matrix Matrix::operator-() const {
+    Matrix result(ROWS, COLS);
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            result[i][j] = -data[i][j];
+        }    
     }
     
     return result;
+}
+
+bool Matrix::operator==(const Matrix &other) const {
+    if (ROWS != other.ROWS || COLS != other.COLS) {
+        return false;
+    }    
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            if (data[i][j] != other[i][j]) {
+                return false;
+            }    
+        }    
+    }    
+    
+    return true;
+}    
+
+bool Matrix::operator!=(const Matrix &other) const {
+    return !(this->operator==(other));
+}    
+
+bool Matrix::operator!() const {
+    return !(this->operator bool());
 }
 
 double *&Matrix::operator[](int row) {

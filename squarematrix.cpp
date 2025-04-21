@@ -4,11 +4,11 @@
 
 SquareMatrix::SquareMatrix(int rows): Matrix(rows, rows) {}
 
-SquareMatrix::SquareMatrix(const SquareMatrix &other): Matrix(other.data, other.ROWS, other.ROWS) {}
+SquareMatrix::SquareMatrix(const SquareMatrix &other): Matrix(other) {}
 
 SquareMatrix::SquareMatrix(SquareMatrix &&other): Matrix(std::move(other)) {}
 
-SquareMatrix::SquareMatrix(const Matrix &other): SquareMatrix(other.getData(), other.getRows()) {
+SquareMatrix::SquareMatrix(const Matrix &other): Matrix(other) {
     if (ROWS != COLS) {
         throw std::invalid_argument("Matrix is not square.");
     }
@@ -69,7 +69,7 @@ double SquareMatrix::determinantRecursive() const {
 
     double result = 0;
     for (int i = 0; i < ROWS; ++i) {
-        result += ((i & 1) ? -1 : 1) * data[0][i] * SquareMatrix(this->operator()(0, i)).determinantRecursive();
+        result += (i & 1 ? -1 : 1) * data[0][i] * this->operator()(0, i).determinantRecursive();
     }
 
     return result;
@@ -115,24 +115,42 @@ bool SquareMatrix::isSymmetric() const {
     return true;
 }
 
-SquareMatrix SquareMatrix::adjoint() const {
+const SquareMatrix SquareMatrix::operator()(int row, int col) const {
+    checkArgs(row, col);
+    
+    SquareMatrix result(ROWS - 1);
+    for (int i = 0; i < ROWS - 1; ++i) {
+        for (int j = 0; j < COLS - 1; ++j) {
+            result[i][j] = data[i + (i >= row)][j + (j >= col)];
+        }
+    }
+    
+    return result;
+}
+
+const SquareMatrix SquareMatrix::adjoint() const {
     SquareMatrix result(ROWS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
-            result[j][i] = ((i & j & 1) ? -1 : 1) * SquareMatrix(this->operator()(i, j)).determinant();
+            result[j][i] = ((i ^ j) & 1 ? -1 : 1) * this->operator()(i, j).determinant();
         }
     }
 
     return result;
 }
 
-SquareMatrix SquareMatrix::inverse() const {
+const SquareMatrix SquareMatrix::inverse() const {
     double det = determinant();
     if (!det) {
         throw std::logic_error("This matrix is not invertible.");
     }
 
     return 1 / det * adjoint();
+}
+
+SquareMatrix &SquareMatrix::operator=(const SquareMatrix &other) {
+    this->Matrix::operator=(other);
+    return *this;
 }
 
 SquareMatrix operator*(double scalar, const SquareMatrix &matrix) {

@@ -37,17 +37,17 @@ class SquareMatrix : public Matrix {
 
         /**
          * @brief Constructs a SquareMatrix from a general Matrix.
-         * @param matrix The Matrix to convert to a SquareMatrix.
+         * @param other The Matrix to convert to a SquareMatrix.
          * @throws std::invalid_argument if the input matrix is not square.
          */
-        SquareMatrix(const Matrix &matrix);
+        SquareMatrix(const Matrix &other);
 
         /**
          * @brief Move constructor to create a SquareMatrix from a general Matrix.
-         * @param matrix The Matrix to move and convert to a SquareMatrix.
+         * @param other The Matrix to move and convert to a SquareMatrix.
          * @throws std::invalid_argument if the input matrix is not square.
          */
-        SquareMatrix(Matrix &&matrix);
+        SquareMatrix(Matrix &&other);
 
         /**
          * @brief Constructs a SquareMatrix from a 2D array.
@@ -55,6 +55,11 @@ class SquareMatrix : public Matrix {
          * @param size The size of the square matrix.
          */
         SquareMatrix(double **array, int size);
+
+        /**
+         * @brief Destructor to free allocated memory.
+         */
+        virtual ~SquareMatrix() override = default;
 
         /**
          * @brief Calculates the trace of the square matrix.
@@ -99,17 +104,33 @@ class SquareMatrix : public Matrix {
         bool isSymmetric() const;
 
         /**
+        * @brief Creates a submatrix by removing the specified row and column from the current matrix.
+        * @param row The index of the row to be removed (1-based index).
+        * @param col The index of the column to be removed (1-based index).
+        * @return SquareMatrix A new matrix with the specified row and column removed.
+        */
+       const SquareMatrix operator()(int row, int col) const;
+
+        /**
          * @brief Computes the adjoint of the square matrix.
          * @return A new SquareMatrix representing the adjoint of the matrix.
          */
-        SquareMatrix adjoint() const;
+        const SquareMatrix adjoint() const;
 
         /**
          * @brief Computes the inverse of the square matrix.
          * @return A new SquareMatrix representing the inverse of the matrix.
          * @throws std::logic_error if the matrix is singular (non-invertible).
          */
-        SquareMatrix inverse() const;
+        const SquareMatrix inverse() const;
+
+        /**
+         * @brief Assignment operator to copy another matrix.
+         * @param other Matrix to copy from.
+         * @return Reference to the current SquareMatrix.
+         */
+        SquareMatrix &operator=(const SquareMatrix &other);
+
 
     /**
     * @brief Overloads the multiplication operator to scale a SquareMatrix by a scalar.
