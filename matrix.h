@@ -11,7 +11,7 @@ using std::ostream;
 using std::istream;
 
 template<typename T>
-    class Matrix {
+class Matrix {
         private:
         const int ROWS;
         const int COLS;
@@ -132,6 +132,7 @@ template<typename T>
             if (row < 0 || row >= ROWS) {
                 throw std::out_of_range("Row index out of bounds.");
             }
+            
             return vector<T>(data[row], data[row] + COLS);
         }
 
@@ -364,7 +365,7 @@ template<typename T>
             return this->operator=(this->operator*(scalar));
         }
 
-        Matrix<T> &operator/(T scalar) {
+        Matrix<T> &operator/=(T scalar) {
             return this->operator=(this->operator/(scalar));
         }
 
@@ -396,6 +397,7 @@ template<typename T>
             if (row < 0 || row >= ROWS) {
                 throw std::out_of_range("Row index out of bounds.");
             }
+            
             return data[row];
         }
 
@@ -403,6 +405,7 @@ template<typename T>
             if (row < 0 || row >= ROWS) {
                 throw std::out_of_range("Row index out of bounds.");
             }
+            
             return data[row];
         }
 
