@@ -1,314 +1,444 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#pragma once
 
 #include <iostream>
+#include <vector>
+#include <stdexcept>
+#include <iomanip>
+#include <sstream>
 
-/**
- * @class Matrix
- * @brief A class for representing and manipulating matrices.
- * 
- * This class provides a variety of methods for matrix operations, including
- * basic arithmetic, row and column manipulations, and transformations such as
- * transpose, row echelon form (REF), and reduced row echelon form (RREF).
- */
-class Matrix {
-    protected:
-        /**
-         * @brief Number of rows in the matrix.
-         */
+using std::vector;
+using std::ostream;
+using std::istream;
+
+template<typename T>
+    class Matrix {
+        private:
         const int ROWS;
-
-        /**
-         * @brief Number of columns in the matrix.
-         */
         const int COLS;
-
-        /**
-         * @brief Pointer to the 2D array storing matrix data.
-         */
-        double** data;
-
-        /**
-         * @brief Validates the row and column indices.
-         * @param row Row index to check.
-         * @param col Column index to check.
-         * @throws std::out_of_range if indices are invalid.
-         */
-        void checkArgs(int row, int col) const;
         
-        /**
-         * @brief Swaps two rows in the matrix.
-         * @param row1 Index of the first row.
-         * @param row2 Index of the second row.
-         */
-        void swapRows(int row1, int row2);
+    protected:
+        vector<T*> data;
 
-        /**
-         * @brief Multiplies a row by a scalar value.
-         * @param row Row index to multiply.
-         * @param scalar Scalar value to multiply the row by.
-         */
-        void multiplyRow(int row, double scalar);
+        size_t maxLength() const {
+            size_t maxl = 0;
+            std::stringstream ss;
+            for (const T *row: data) {
+                for (int i = 0; i < COLS; ++i) {
+                    ss.str("");
+                    ss << row[i];
+                    maxl = std::max(maxl, ss.str().length());
+                }
+            }
+            
+            return maxl;
+        }
         
-        /**
-         * @brief Adds a multiple of one row to another row.
-         * @param targetRow Index of the row to modify.
-         * @param sourceRow Index of the row to scale and add.
-         * @param scalar Scalar value to multiply the source row by.
-         */
-        void addMultipleRow(int targetRow, int sourceRow, double scalar);
+        void multiplyRow(int row, T scalar) {
+            for (int i = 0; i < COLS; ++i) {
+                data[row][i] *= scalar;
+            }
+        }
         
+        void divideRow(int row, T scalar) {
+            for (int i = 0; i < COLS; ++i) {
+                data[row][i] /= scalar;
+            }
+        }
+        
+        void addMultipleRow(int targetRow, int sourceRow, T scalar) {
+            for (int i = 0; i < COLS; ++i) {
+                data[targetRow][i] += data[sourceRow][i] * scalar;
+            }
+        }
+
     public:
-        /**
-         * @brief Constructs a matrix with the specified dimensions.
-         * @param rows Number of rows (default is 1).
-         * @param cols Number of columns (default is 1).
-         */
-        Matrix(int rows = 1, int cols = 1);
+        Matrix(int rows, int cols): ROWS(rows), COLS(cols), data(ROWS, nullptr) {
+            if (ROWS < 1 || COLS < 1) {
+                throw std::invalid_argument("Matrix dimensions must be greater than 0.");
+            }
+            
+            for (T *&row: data) {
+                row = new T[COLS];
+            }
+        }
 
-        /**
-         * @brief Copy constructor.
-         * @param other Matrix to copy from.
-         */
-        Matrix(const Matrix &other);
+        Matrix(const Matrix<T>&other): Matrix(other.data, other.ROWS, other.COLS) {}
 
-        /**
-         * @brief Move Constructor.
-         * @param other Matrix to move from.
-         */
-        Matrix(Matrix &&other);
+        Matrix(Matrix<T> &&other): ROWS(other.ROWS), COLS(other.COLS) {
+            data = std::move(other.data);
+            other.data.assign(ROWS, nullptr);
+        }
 
-        /**
-         * @brief Constructs a matrix from a 2D array.
-         * @param data Pointer to a 2D array of values.
-         * @param rows Number of rows in the array.
-         * @param cols Number of columns in the array.
-         */
-        Matrix(double **data, int rows, int cols);
+        Matrix(const vector<T*> &values, int rows, int cols): Matrix(rows, cols) {
+            for (int i = 0; i < ROWS; ++i) {
+                setRow(i, values[i]);
+            }
+        }
+
+        ~Matrix() {
+            for (T *&ptr: data) {
+                delete[] ptr;
+            }
+        }
 
 
-        /**
-         * @brief Destructor to free allocated memory.
-         */
-        virtual ~Matrix();
+        int getRows() const {
+            return ROWS;
+        }
 
-        /**
-         * @brief Gets the 2D array that represents the matrix.
-         * @return Pointer to a 2D array of values.
-         */
-        double **getData() const;
+        int getCols() const {
+            return COLS;
+        }
+
+        void setRow(int row, const vector<T> &values) {
+            if (row < 0 || row >= ROWS) {
+                throw std::out_of_range("Row index out of bounds.");
+            }
+
+            if (values.size() != COLS) {
+                throw std::invalid_argument("The vector size must be equal to the number columns.");
+            }
+            
+            for (int i = 0; i < COLS; ++i) {
+                data[row][i] = values[i];
+            }
+        }
+
+        void setRow(int row, const T *values) {
+            if (row < 0 || row >= ROWS) {
+                throw std::out_of_range("Row index out of bounds.");
+            }
+            
+            for (int i = 0; i < COLS; ++i) {
+                data[row][i] = values[i];
+            }
+        }
+
+        void setCol(int col, const vector<T> &values) {
+            if (col < 0 || col >= COLS) {
+                throw std::out_of_range("Column index out of bounds.");
+            }
+
+            if (values.size() != ROWS) {
+                throw std::invalid_argument("The vector size must be equal to the number rows.");
+            }
+
+            for (int i = 0; i < ROWS; ++i) {
+                data[i][col] = values[i];
+            }
+        }
+
+        vector<T> getRow(int row) const {
+            if (row < 0 || row >= ROWS) {
+                throw std::out_of_range("Row index out of bounds.");
+            }
+            return vector<T>(data[row], data[row] + COLS);
+        }
+
+        vector<T> getCol(int col) const {
+            if (col < 0 || col >= COLS) {
+                throw std::out_of_range("Column index out of bounds.");
+            }
+            
+            vector<T> result(ROWS);
+            for (int i = 0; i < ROWS; ++i) {
+                result[i] = data[i][col];
+            }
+            
+            return result;
+        }
+
+        bool isZeroRow(int row) const {
+            if (row < 0 || row >= ROWS) {
+                throw std::out_of_range("Row index out of bounds.");
+            }
+            
+            for (int i = 0; i < COLS; ++i) {
+                if (data[row][i]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        bool isZeroCol(int col) const {
+            if (col < 0 || col >= COLS) {
+                throw std::out_of_range("Column index out of bounds.");
+            }
+
+            for (const T *row: data) {
+                if (row[col]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        int rank() const {
+            Matrix<T> rrefMatrix(std::move(rref()));
+            int rank = 0;
+
+            while (rank < ROWS && !rrefMatrix.isZeroRow(rank)) {
+                ++rank;
+            }
+
+            return rank;
+        }
+
+        const Matrix<T> transpose() const {
+            Matrix<T> result(COLS, ROWS);
+            for (int i = 0; i < ROWS; ++i) {
+                for (int j = 0; j < COLS; ++j) {
+                    result[j][i] = data[i][j];
+                }
+            }
+            
+            return result;
+        }
+
+        const Matrix<T> ref() const {
+            Matrix<T> result(*this);
+            int r = 0, r0 = 0, c = 0;
+            T pivot;
+
+            while (r0 < ROWS && c < COLS) {
+                while (r < ROWS && result[r][c] == T()) {
+                    ++r;
+                }
+                if (r == ROWS) {
+                    r = r0;
+                    ++c;
+                    continue;
+                }
+
+                std::swap(result[r], result[r0]);
+                pivot = result[r0][c];
+                for (int i = r0 + 1; i < ROWS; ++i) {
+                    if (result[i][c]) {
+                        result.addMultipleRow(i, r0, -result[i][c] / pivot);
+                    }
+                }
+                r = ++r0;
+                ++c;
+            }
+            
+            return result;
+        }
+
+        const Matrix<T> rref() const {
+            Matrix<T> result(*this);
+            int r = 0, r0 = 0, c = 0;
+
+            while (r0 < ROWS && c < COLS) {
+                while (r < ROWS && result[r][c] == T()) {
+                    ++r;
+                }
+                if (r == ROWS) {
+                    r = r0;
+                    ++c;
+                    continue;
+                }
+
+                std::swap(result[r], result[r0]);
+                result.divideRow(r0, result[r0][c]);
+                for (int i = 0; i < ROWS; ++i) {
+                    if (result[i][c] == T() && i != r0) {
+                        result.addMultipleRow(i, r0, -result[i][c]);
+                    }
+                }
+                r = ++r0;
+                ++c;
+            }
+
+            return result;
+        }
+
+        Matrix<T> &operator=(const Matrix<T>&other) {
+            if (&other == this) {
+                return *this;
+            }
+
+            if (ROWS != other.ROWS || COLS != other.COLS) {
+                throw std::logic_error("Matrix dimensions must match for assignment.");
+            }
+
+            for (int i = 0; i < ROWS; ++i) {
+                setRow(i, other[i]);
+            }
+            
+            return *this;
+        }
+
+        const Matrix<T> operator+(const Matrix<T>&other) const {
+            if (ROWS != other.ROWS || COLS != other.COLS) {
+                throw std::logic_error("Matrix dimensions must match for addition.");
+            }
+
+            Matrix<T> result(ROWS, COLS);
+            for (int i = 0; i < ROWS; ++i) {
+                for (int j = 0; j < COLS; ++j) {
+                    result[i][j] = data[i][j] + other[i][j];
+                }
+            }
+            
+            return result;
+        }
+
+        const Matrix<T> operator-(const Matrix<T>&other) const {
+            if (ROWS != other.ROWS || COLS != other.COLS) {
+                throw std::logic_error("Matrix dimensions must match for subtraction.");
+            }
+
+            Matrix<T> result(ROWS, COLS);
+            for (int i = 0; i < ROWS; ++i) {
+                for (int j = 0; j < COLS; ++j) {
+                    result[i][j] = data[i][j] - other[i][j];
+                }
+            }
+            
+            return result;
+        }
+
+        const Matrix<T> operator-() const {
+            Matrix<T> result(ROWS, COLS);
+            for (int i = 0; i < ROWS; ++i) {
+                for (int j = 0; j < COLS; ++j) {
+                    result[i][j] = -data[i][j];
+                }
+            }
+            
+            return result;
+        }
+
+        const Matrix<T> operator*(const Matrix<T>&other) const {
+            if (COLS != other.ROWS) {
+                throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
+            }
+
+            Matrix<T> result(ROWS, other.COLS);
+            for (int i = 0; i < ROWS; ++i) {
+                for (int j = 0; j < other.COLS; ++j) {
+                    result[i][j] = T();
+                    for (int k = 0; k < COLS; ++k) {
+                        result[i][j] += data[i][k] * other[k][j];
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        const Matrix<T> operator*(T scalar) const {
+            Matrix<T> result(*this);
+            for (int i = 0; i < ROWS; ++i) {
+                result.multiplyRow(i, scalar);
+            }
+            
+            return result;
+        }
+
+        const Matrix<T> operator/(T scalar) const {
+            Matrix<T> result(*this);
+            for (int i = 0; i < ROWS; ++i) {
+                result.divideRow(i, scalar);
+            }
+            
+            return result;
+        }
+
+        Matrix<T> &operator+=(const Matrix<T>&other) {
+            return this->operator=(this->operator+(other));
+        }
+
+        Matrix<T> &operator-=(const Matrix<T>&other) {
+            return this->operator=(this->operator-(other));
+        }
+
+        Matrix<T> &operator*=(const Matrix<T>&other) {
+            return this->operator=(this->operator*(other));
+        }
+
+        Matrix<T> &operator*=(T scalar) {
+            return this->operator=(this->operator*(scalar));
+        }
+
+        Matrix<T> &operator/(T scalar) {
+            return this->operator=(this->operator/(scalar));
+        }
+
+        bool operator==(const Matrix<T>&other) const {
+            if (ROWS != other.ROWS || COLS != other.COLS) {
+                return false;
+            }
+
+            for (int i = 0; i < ROWS; ++i) {
+                for (int j = 0; j < COLS; ++j) {
+                    if (data[i][j] != other[i][j]) {
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+
+        bool operator!=(const Matrix<T>&other) const {
+            return !(this->operator==(other));
+        }
+
+        bool operator!() const {
+            return !(this->operator bool());
+        }
+
+        T *&operator[](int row) {
+            if (row < 0 || row >= ROWS) {
+                throw std::out_of_range("Row index out of bounds.");
+            }
+            return data[row];
+        }
+
+        const T *operator[](int row) const {
+            if (row < 0 || row >= ROWS) {
+                throw std::out_of_range("Row index out of bounds.");
+            }
+            return data[row];
+        }
+
+        operator bool() const {
+            for (int i = 0; i < ROWS; ++i) {
+                if (!isZeroRow(i)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
         
-        /**
-         * @brief Gets the number of rows in the matrix.
-         * @return Number of rows.
-         */
-        int getRows() const;
+    friend Matrix<T> operator*(T scalar, const Matrix<T> &matrix) {
+        return matrix * scalar;
+    }
+
+    friend ostream& operator<<(ostream &os, const Matrix<T> &matrix) {
+        int maxl = 1 + matrix.maxLength();
+        for (const T *row: matrix.data) {
+            for (int i = 0; i < matrix.COLS; ++i) {
+                os << std::setw(maxl) << row[i];
+            }
+            os << std::endl;
+        }
+
+        return os;
+    }
+
+    friend istream& operator>>(istream &is, Matrix<T> &matrix) {
+        for (T *row: matrix.data) {
+            for (int i = 0; i < matrix.COLS; ++i) {
+                is >> row[i];
+            }
+        }
         
-        /**
-         * @brief Gets the number of columns in the matrix.
-         * @return Number of columns.
-         */
-        int getCols() const;
-        
-        /**
-         * @brief Sets the values of a specific row.
-         * @param row Row index to set.
-         * @param values Array of values to assign to the row.
-         */
-        void setRow(int row, const double* values);
-
-        /**
-         * @brief Sets the values of a specific column.
-         * @param col Column index to set.
-         * @param values Array of values to assign to the column.
-         */
-        void setCol(int col, const double* values);
-
-        /**
-         * @brief Retrieves a specific row as an array.
-         * @param row Index of the row to retrieve.
-         * @return Pointer to the row array.
-         */
-        int* getRow(int row) const;
-
-        /**
-         * @brief Retrieves a specific column as an array.
-         * @param col Index of the column to retrieve.
-         * @return Pointer to the column array.
-         */
-        int* getCol(int col) const;
-
-        /**
-         * @brief Checks if a specific row is a zero row.
-         * @param row Index of the row to check.
-         * @return True if the row is a zero row, false otherwise.
-         */
-        bool isZeroRow(int row) const;
-
-        /**
-         * @brief Checks if a specific column is a zero column.
-         * @param col Index of the column to check.
-         * @return True if the column is a zero column, false otherwise.
-         */
-        bool isZeroCol(int col) const;
-        
-        /**
-         * @brief Computes the rank of the matrix.
-         * @return Rank of the matrix.
-         */
-        int rank() const;
-
-        /**
-         * @brief Computes the transpose of the matrix.
-         * @return Transposed matrix.
-         */
-        const Matrix transpose() const;
-
-        /**
-         * @brief Computes the row echelon form (REF) of the matrix.
-         * @return Matrix in REF.
-         */
-        const Matrix ref() const;
-
-        /**
-         * @brief Computes the reduced row echelon form (RREF) of the matrix.
-         * @param unit Value to use for the leading 1s (default is 1.0).
-         * @return Matrix in RREF.
-         */
-        const Matrix rref(double unit = 1.0) const;
-
-        /**
-         * @brief Assignment operator to copy another matrix.
-         * @param other Matrix to copy from.
-         * @return Reference to the current matrix.
-         */
-        Matrix &operator=(const Matrix &other);
-
-        /**
-         * @brief Adds two matrices.
-         * @param other Matrix to add.
-         * @return Resulting matrix after addition.
-         */
-        const Matrix operator+(const Matrix &other) const;
-
-        /**
-         * @brief Subtracts another matrix from the current matrix.
-         * @param other Matrix to subtract.
-         * @return Resulting matrix after subtraction.
-         */
-        const Matrix operator-(const Matrix &other) const;
-
-        /**
-         * @brief Multiplies two matrices.
-         * @param other Matrix to multiply with.
-         * @return Resulting matrix after multiplication.
-         */
-        const Matrix operator*(const Matrix &other) const;
-
-        /**
-         * @brief Multiplies the current matrix by a scalar.
-         * @param scalar Scalar value to multiply with.
-         * @return Resulting matrix after scalar multiplication.
-         */
-        const Matrix operator*(double scalar) const;
-
-        /**
-         * @brief Adds another matrix to the current matrix (in-place).
-         * @param other Matrix to add.
-         * @return Reference to the current matrix.
-         */
-        Matrix &operator+=(const Matrix &other);
-
-        /**
-         * @brief Subtracts another matrix from the current matrix (in-place).
-         * @param other Matrix to subtract.
-         * @return Reference to the current matrix.
-         */
-        Matrix &operator-=(const Matrix &other);
-
-        /**
-         * @brief Multiplies the current matrix by another matrix (in-place).
-         * @param other Matrix to multiply with.
-         * @return Reference to the current matrix.
-         */
-        Matrix &operator*=(const Matrix &other);
-        
-        /**
-         * @brief Multiplies the current matrix by a scalar (in-place).
-         * @param scalar Scalar value to multiply with.
-         * @return Reference to the current matrix.
-         */
-        Matrix &operator*=(double scalar);
-
-        /**
-         * @brief Negates the matrix.
-         * @return Negated matrix.
-         */
-        const Matrix operator-() const;
-
-        /**
-         * @brief Checks if two matrices are equal.
-         * @param other Matrix to compare with.
-         * @return True if matrices are equal, false otherwise.
-         */
-        bool operator==(const Matrix &other) const;
-
-        /**
-         * @brief Checks if two matrices are not equal.
-         * @param other Matrix to compare with.
-         * @return True if matrices are not equal, false otherwise.
-         */
-        bool operator!=(const Matrix &other) const;
-
-        /**
-         * @brief Checks if the matrix is a zero matrix.
-         * @return True if the matrix is a zero matrix, false otherwise.
-         */
-        bool operator!() const;
-
-        /**
-         * @brief Overloads the subscript operator to provide access to a specific row of the matrix.
-         * @param row The index of the row to access.
-         * @return A reference to a pointer to the first element of the specified row.
-         */
-        double *&operator[](int row);
-        
-        /**
-         * @brief Overloads the subscript operator to provide access to a specific row of the matrix.
-         * @param row The index of the row to access.
-         * @return A pointer to the first element of the specified row.
-         */
-        const double *operator[](int row) const;
-
-        /**
-         * @brief Checks if the matrix is not a zero matrix.
-         * @return False if the matrix is a zero matrix, true otherwise.
-         */
-        operator bool() const;
-
-    /**
-     * @brief Multiplies a scalar with a matrix.
-     * @param scalar Scalar value to multiply.
-     * @param matrix Matrix to multiply with.
-     * @return Resulting matrix after scalar multiplication.
-     */
-    friend Matrix operator*(double scalar, const Matrix &matrix);
-
-    /**
-     * @brief Outputs the matrix to an output stream.
-     * @param os Output stream to write to.
-     * @param matrix Matrix to output.
-     * @return Reference to the output stream.
-     */
-    friend std::ostream& operator<<(std::ostream& os, const Matrix &matrix);
-
-    /**
-     * @brief Inputs the matrix from an input stream.
-     * @param is Input stream to read from.
-     * @param matrix Matrix to populate.
-     * @return Reference to the input stream.
-     */
-    friend std::istream& operator>>(std::istream& is, Matrix &matrix);
+        return is;
+    }
 };
-
-#endif
