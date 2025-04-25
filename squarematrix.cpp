@@ -1,5 +1,4 @@
 #include "squarematrix.h"
-#include <iostream>
 #include <stdexcept>
 
 SquareMatrix::SquareMatrix(int rows): Matrix(rows, rows) {}
@@ -9,22 +8,22 @@ SquareMatrix::SquareMatrix(const SquareMatrix &other): Matrix(other) {}
 SquareMatrix::SquareMatrix(SquareMatrix &&other): Matrix(std::move(other)) {}
 
 SquareMatrix::SquareMatrix(const Matrix &other): Matrix(other) {
-    if (ROWS != COLS) {
+    if (getRows() != getCols()) {
         throw std::invalid_argument("Matrix is not square.");
     }
 }
 
 SquareMatrix::SquareMatrix(Matrix &&other): Matrix(std::move(other)) {
-    if (ROWS != COLS) {
+    if (getRows() != getCols()) {
         throw std::invalid_argument("Matrix is not square.");
     }
 }
 
-SquareMatrix::SquareMatrix(double **array, int rows): Matrix(array, rows, rows) {}
+SquareMatrix::SquareMatrix(vector<double*> values, int rows): Matrix(values, rows, rows) {}
 
 double SquareMatrix::trace() const {
     double result = 0;
-    for (int i = 0; i < ROWS; ++i) {
+    for (int i = 0; i < getRows(); ++i) {
         result += data[i][i];
     }
     return result;
@@ -35,20 +34,20 @@ double SquareMatrix::determinant() const {
     int r = 0, c = 0;
     double pivot, result = 1;
 
-    while (c < COLS) {
-        while (r < ROWS && !copy[r][c]) {
+    while (c < getCols()) {
+        while (r < getRows() && !copy[r][c]) {
             ++r;
         }
-        if (r == ROWS) {
+        if (r == getRows()) {
             return 0.0;
         }
         if (r != c) {
-            copy.swapRows(r, c);
+            std::swap(copy[r], copy[c]);
             result = -result;
         }
 
         pivot = copy[c][c];
-        for (int i = c + 1; i < ROWS; ++i) {
+        for (int i = c + 1; i < getRows(); ++i) {
             if (copy[i][c]) {
                 copy.addMultipleRow(i, c, -copy[i][c] / pivot);
             }
@@ -56,19 +55,19 @@ double SquareMatrix::determinant() const {
         r = ++c;
     }
 
-    for (int i = 0; i < ROWS; ++i) {
+    for (int i = 0; i < getRows(); ++i) {
         result *= copy[i][i];
     }
     return result;
 }
 
 double SquareMatrix::determinantRecursive() const {
-    if (ROWS == 1) {
+    if (getRows() == 1) {
         return data[0][0];
     }
 
     double result = 0;
-    for (int i = 0; i < ROWS; ++i) {
+    for (int i = 0; i < getRows(); ++i) {
         result += (i & 1 ? -1 : 1) * data[0][i] * this->operator()(0, i).determinantRecursive();
     }
 
@@ -76,8 +75,8 @@ double SquareMatrix::determinantRecursive() const {
 }
 
 bool SquareMatrix::isLTriangular() const {
-    for (int i = 0; i < ROWS - 1; ++i) {
-        for (int j = i + 1; j < COLS; ++j) {
+    for (int i = 0; i < getRows() - 1; ++i) {
+        for (int j = i + 1; j < getCols(); ++j) {
             if (data[i][j]) {
                 return false;
             }
@@ -88,7 +87,7 @@ bool SquareMatrix::isLTriangular() const {
 }
 
 bool SquareMatrix::isUTriangular() const {
-    for (int i = 1; i < ROWS; ++i) {
+    for (int i = 1; i < getRows(); ++i) {
         for (int j = 0; j < i; ++j) {
             if (data[i][j]) {
                 return false;
@@ -104,7 +103,7 @@ bool SquareMatrix::isDiagonal() const {
 }
 
 bool SquareMatrix::isSymmetric() const {
-    for (int i = 1; i < ROWS; ++i) {
+    for (int i = 1; i < getRows(); ++i) {
         for (int j = 0; j < i; ++j) {
             if (data[i][j] != data[j][i]) {
                 return false;
@@ -116,11 +115,17 @@ bool SquareMatrix::isSymmetric() const {
 }
 
 const SquareMatrix SquareMatrix::operator()(int row, int col) const {
-    checkArgs(row, col);
+    if (row < 0 || row >= getRows()) {
+        throw std::out_of_range("Row index out of bounds.");
+    }
+
+    if (col < 0 || col >= getCols()) {
+        throw std::out_of_range("Column index out of bounds.");
+    }
     
-    SquareMatrix result(ROWS - 1);
-    for (int i = 0; i < ROWS - 1; ++i) {
-        for (int j = 0; j < COLS - 1; ++j) {
+    SquareMatrix result(getRows() - 1);
+    for (int i = 0; i < getRows() - 1; ++i) {
+        for (int j = 0; j < getCols() - 1; ++j) {
             result[i][j] = data[i + (i >= row)][j + (j >= col)];
         }
     }
@@ -129,9 +134,9 @@ const SquareMatrix SquareMatrix::operator()(int row, int col) const {
 }
 
 const SquareMatrix SquareMatrix::adjoint() const {
-    SquareMatrix result(ROWS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
+    SquareMatrix result(getRows());
+    for (int i = 0; i < getRows(); ++i) {
+        for (int j = 0; j < getCols(); ++j) {
             result[j][i] = ((i ^ j) & 1 ? -1 : 1) * this->operator()(i, j).determinant();
         }
     }
@@ -145,7 +150,7 @@ const SquareMatrix SquareMatrix::inverse() const {
         throw std::logic_error("This matrix is not invertible.");
     }
 
-    return 1 / det * adjoint();
+    return SquareMatrix(adjoint() / det);
 }
 
 SquareMatrix &SquareMatrix::operator=(const SquareMatrix &other) {
@@ -153,13 +158,8 @@ SquareMatrix &SquareMatrix::operator=(const SquareMatrix &other) {
     return *this;
 }
 
-SquareMatrix operator*(double scalar, const SquareMatrix &matrix) {
-    SquareMatrix result(matrix);
-    for (int i = 0; i < result.ROWS; ++i) {
-        result.multiplyRow(i, scalar);
-    }
-    
-    return result;
+const SquareMatrix operator*(double scalar, const SquareMatrix &matrix) {
+    return SquareMatrix(matrix * scalar);
 }
 
 std::ostream& operator<<(std::ostream &os, const SquareMatrix &matrix) {
@@ -167,9 +167,9 @@ std::ostream& operator<<(std::ostream &os, const SquareMatrix &matrix) {
 }
 
 std::istream& operator>>(std::istream &is, SquareMatrix &matrix) {
-    for (int i = 0; i < matrix.ROWS; ++i) {
-        for (int j = 0; j < matrix.COLS; ++j) {
-            is >> matrix[i][j];
+    for (double *row: matrix.data) {
+        for (int i = 0; i < matrix.getCols(); ++i) {
+            is >> row[i];
         }
     }
     

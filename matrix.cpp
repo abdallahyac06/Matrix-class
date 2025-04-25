@@ -1,80 +1,77 @@
 #include "matrix.h"
-#include <iostream>
 #include <stdexcept>
+#include <iomanip>
+#include <sstream>
 
-Matrix::Matrix(int rows, int cols): ROWS(rows), COLS(cols) {
+Matrix::Matrix(int rows, int cols): ROWS(rows), COLS(cols), data(ROWS, nullptr) {
     if (ROWS < 1 || COLS < 1) {
         throw std::invalid_argument("Matrix dimensions must be greater than 0.");
     }
-
-    data = new double*[ROWS];
-    for (int i = 0; i < ROWS; ++i) {
-        data[i] = new double[COLS];
+    
+    for (double *&row: data) {
+        row = new double[COLS];
     }
 }
 
-Matrix::Matrix(const Matrix &other): Matrix(other.data, other.ROWS, other.COLS) {}
+Matrix::Matrix(const Matrix&other): Matrix(other.data, other.ROWS, other.COLS) {}
 
 Matrix::Matrix(Matrix &&other): ROWS(other.ROWS), COLS(other.COLS) {
-    data = other.data;
-    other.data = nullptr;
+    data = std::move(other.data);
+    other.data.assign(ROWS, nullptr);
 }
 
-Matrix::Matrix(double **array, int rows, int cols): Matrix(rows, cols) {
+Matrix::Matrix(const vector<double*> &values, int rows, int cols): Matrix(rows, cols) {
     for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            data[i][j] = array[i][j];
-        }
+        setRow(i, values[i]);
     }
 }
 
 Matrix::~Matrix() {
-    if (data) {
-        for (int i = 0; i < ROWS; ++i) {
-            delete[] data[i];
-            data[i] = nullptr;
-        }
-
-        delete[] data;
-        data = nullptr;
+    for (double *&row: data) {
+        delete[] row;
     }
 }
 
-void Matrix::checkArgs(int row, int col) const {
+size_t Matrix::maxLength() const {
+    size_t maxl = 0;
+    std::stringstream ss;
+    for (const double *row: data) {
+        for (int i = 0; i < COLS; ++i) {
+            ss.str("");
+            ss << row[i];
+            maxl = std::max(maxl, ss.str().length());
+        }
+    }
+    
+    return maxl;
+}
+
+void Matrix::setRow(int row, const double *values) {
     if (row < 0 || row >= ROWS) {
         throw std::out_of_range("Row index out of bounds.");
     }
-    if (col < 0 || col >= COLS) {
-        throw std::out_of_range("Col index out of bounds.");
+    
+    for (int i = 0; i < COLS; ++i) {
+        data[row][i] = values[i];
     }
 }
 
-void Matrix::swapRows(int row1, int row2) {
-    checkArgs(row1, 0);
-    checkArgs(row2, 0);
-
-    std::swap(data[row1], data[row2]);
-}
-
 void Matrix::multiplyRow(int row, double scalar) {
-    checkArgs(row, 0);
-
     for (int i = 0; i < COLS; ++i) {
         data[row][i] *= scalar;
     }
 }
 
-void Matrix::addMultipleRow(int targetRow, int sourceRow, double scalar) {
-    checkArgs(targetRow, 0);
-    checkArgs(sourceRow, 0);
-
+void Matrix::divideRow(int row, double scalar) {
     for (int i = 0; i < COLS; ++i) {
-        data[targetRow][i] += data[sourceRow][i] * scalar;
+        data[row][i] /= scalar;
     }
 }
 
-double **Matrix::getData() const {
-    return data;
+void Matrix::addMultipleRow(int targetRow, int sourceRow, double scalar) {
+    for (int i = 0; i < COLS; ++i) {
+        data[targetRow][i] += data[sourceRow][i] * scalar;
+    }
 }
 
 int Matrix::getRows() const {
@@ -85,37 +82,48 @@ int Matrix::getCols() const {
     return COLS;
 }
 
-void Matrix::setRow(int row, const double *values) {
-    checkArgs(row, 0);
+void Matrix::setRow(int row, const vector<double> &values) {
+    if (row < 0 || row >= ROWS) {
+        throw std::out_of_range("Row index out of bounds.");
+    }
+
+    if (values.size() != COLS) {
+        throw std::invalid_argument("The vector size must be equal to the number columns.");
+    }
     
     for (int i = 0; i < COLS; ++i) {
         data[row][i] = values[i];
     }
 }
 
-void Matrix::setCol(int col, const double *values) {
-    checkArgs(0, col);
-    
+void Matrix::setCol(int col, const vector<double> &values) {
+    if (col < 0 || col >= COLS) {
+        throw std::out_of_range("Column index out of bounds.");
+    }
+
+    if (values.size() != ROWS) {
+        throw std::invalid_argument("The vector size must be equal to the number rows.");
+    }
+
     for (int i = 0; i < ROWS; ++i) {
         data[i][col] = values[i];
     }
 }
 
-int *Matrix::getRow(int row) const {
-    checkArgs(row, 0);
-
-    int *result = new int[COLS];
-    for (int i = 0; i < COLS; ++i) {
-        result[i] = data[row][i];
+vector<double> Matrix::getRow(int row) const {
+    if (row < 0 || row >= ROWS) {
+        throw std::out_of_range("Row index out of bounds.");
     }
-    
-    return result;
+
+    return vector<double>(data[row], data[row] + COLS);
 }
 
-int *Matrix::getCol(int col) const {
-    checkArgs(0, col);
+vector<double> Matrix::getCol(int col) const {
+    if (col < 0 || col >= COLS) {
+        throw std::out_of_range("Column index out of bounds.");
+    }
     
-    int *result = new int[ROWS];
+    vector<double> result(ROWS);
     for (int i = 0; i < ROWS; ++i) {
         result[i] = data[i][col];
     }
@@ -124,7 +132,9 @@ int *Matrix::getCol(int col) const {
 }
 
 bool Matrix::isZeroRow(int row) const {
-    checkArgs(row, 0);
+    if (row < 0 || row >= ROWS) {
+        throw std::out_of_range("Row index out of bounds.");
+    }
     
     for (int i = 0; i < COLS; ++i) {
         if (data[row][i]) {
@@ -136,10 +146,12 @@ bool Matrix::isZeroRow(int row) const {
 }
 
 bool Matrix::isZeroCol(int col) const {
-    checkArgs(0, col);
+    if (col < 0 || col >= COLS) {
+        throw std::out_of_range("Column index out of bounds.");
+    }
 
-    for (int i = 0; i < ROWS; ++i) {
-        if (data[i][col]) {
+    for (const double *row: data) {
+        if (row[col]) {
             return false;
         }
     }
@@ -156,7 +168,7 @@ int Matrix::rank() const {
     }
 
     return rank;
-}    
+}
 
 const Matrix Matrix::transpose() const {
     Matrix result(COLS, ROWS);
@@ -173,10 +185,9 @@ const Matrix Matrix::ref() const {
     Matrix result(*this);
     int r = 0, r0 = 0, c = 0;
     double pivot;
-    // double tmp;
 
     while (r0 < ROWS && c < COLS) {
-        while (r < ROWS && !result[r][c]) {
+        while (r < ROWS && result[r][c] == double()) {
             ++r;
         }
         if (r == ROWS) {
@@ -185,13 +196,10 @@ const Matrix Matrix::ref() const {
             continue;
         }
 
-        result.swapRows(r, r0);
+        std::swap(result[r], result[r0]);
         pivot = result[r0][c];
         for (int i = r0 + 1; i < ROWS; ++i) {
             if (result[i][c]) {
-                // tmp = result[i][c];
-                // result. multiplyRow(i, pivot);
-                // result.addMultipleRow(i, r0, -tmp);
                 result.addMultipleRow(i, r0, -result[i][c] / pivot);
             }
         }
@@ -202,12 +210,12 @@ const Matrix Matrix::ref() const {
     return result;
 }
 
-const Matrix Matrix::rref(double unit) const {
+const Matrix Matrix::rref() const {
     Matrix result(*this);
     int r = 0, r0 = 0, c = 0;
 
     while (r0 < ROWS && c < COLS) {
-        while (r < ROWS && !result[r][c]) {
+        while (r < ROWS && result[r][c] == double()) {
             ++r;
         }
         if (r == ROWS) {
@@ -216,10 +224,10 @@ const Matrix Matrix::rref(double unit) const {
             continue;
         }
 
-        result.swapRows(r, r0);
-        result.multiplyRow(r0, unit / result[r0][c]);
+        std::swap(result[r], result[r0]);
+        result.divideRow(r0, result[r0][c]);
         for (int i = 0; i < ROWS; ++i) {
-            if (result[i][c] && i != r0) {
+            if (result[i][c] == double() && i != r0) {
                 result.addMultipleRow(i, r0, -result[i][c]);
             }
         }
@@ -230,93 +238,50 @@ const Matrix Matrix::rref(double unit) const {
     return result;
 }
 
-Matrix &Matrix::operator=(const Matrix &other) {
+Matrix &Matrix::operator=(const Matrix&other) {
     if (&other == this) {
         return *this;
     }
 
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw std::logic_error("Matrix dimensions must match for assignment.");
-    }    
+    }
 
     for (int i = 0; i < ROWS; ++i) {
         setRow(i, other[i]);
-    }    
+    }
     
     return *this;
-}    
+}
 
-const Matrix Matrix::operator+(const Matrix &other) const {
+const Matrix Matrix::operator+(const Matrix&other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw std::logic_error("Matrix dimensions must match for addition.");
-    }    
+    }
 
     Matrix result(ROWS, COLS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
             result[i][j] = data[i][j] + other[i][j];
-        }    
-    }    
+        }
+    }
     
     return result;
-}    
+}
 
-const Matrix Matrix::operator-(const Matrix &other) const {
+const Matrix Matrix::operator-(const Matrix&other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw std::logic_error("Matrix dimensions must match for subtraction.");
-    }    
+    }
 
     Matrix result(ROWS, COLS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
             result[i][j] = data[i][j] - other[i][j];
-        }    
-    }    
+        }
+    }
     
     return result;
-}    
-
-const Matrix Matrix::operator*(const Matrix &other) const {
-    if (COLS != other.ROWS) {
-        throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
-    }    
-
-    Matrix result(ROWS, other.COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < other.COLS; ++j) {
-            result[i][j] = 0.0;
-            for (int k = 0; k < COLS; ++k) {
-                result[i][j] += data[i][k] * other[k][j];
-            }    
-        }    
-    }    
-    
-    return result;
-}    
-
-const Matrix Matrix::operator*(double scalar) const {
-    Matrix result(ROWS, COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        result.multiplyRow(i, scalar);
-    }    
-    
-    return result;
-}    
-
-Matrix &Matrix::operator+=(const Matrix &other) {
-    return this->operator=(this->operator+(other));
-}    
-
-Matrix &Matrix::operator-=(const Matrix &other) {
-    return this->operator=(this->operator-(other));
-}    
-
-Matrix &Matrix::operator*=(const Matrix &other) {
-    return this->operator=(this->operator*(other));
-}    
-
-Matrix &Matrix::operator*=(double scalar) {
-    return this->operator=(this->operator*(scalar));
 }
 
 const Matrix Matrix::operator-() const {
@@ -324,42 +289,105 @@ const Matrix Matrix::operator-() const {
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
             result[i][j] = -data[i][j];
-        }    
+        }
     }
     
     return result;
 }
 
-bool Matrix::operator==(const Matrix &other) const {
+const Matrix Matrix::operator*(const Matrix&other) const {
+    if (COLS != other.ROWS) {
+        throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
+    }
+
+    Matrix result(ROWS, other.COLS);
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < other.COLS; ++j) {
+            result[i][j] = double();
+            for (int k = 0; k < COLS; ++k) {
+                result[i][j] += data[i][k] * other[k][j];
+            }
+        }
+    }
+
+    return result;
+}
+
+const Matrix Matrix::operator*(double scalar) const {
+    Matrix result(*this);
+    for (int i = 0; i < ROWS; ++i) {
+        result.multiplyRow(i, scalar);
+    }
+    
+    return result;
+}
+
+const Matrix Matrix::operator/(double scalar) const {
+    Matrix result(*this);
+    for (int i = 0; i < ROWS; ++i) {
+        result.divideRow(i, scalar);
+    }
+    
+    return result;
+}
+
+Matrix &Matrix::Matrix::operator+=(const Matrix&other) {
+    return this->operator=(this->operator+(other));
+}
+
+Matrix &Matrix::operator-=(const Matrix&other) {
+    return this->operator=(this->operator-(other));
+}
+
+Matrix &Matrix::operator*=(const Matrix&other) {
+    return this->operator=(this->operator*(other));
+}
+
+Matrix &Matrix::operator*=(double scalar) {
+    return this->operator=(this->operator*(scalar));
+}
+
+Matrix &Matrix::operator/=(double scalar) {
+    return this->operator=(this->operator/(scalar));
+}
+
+bool Matrix::operator==(const Matrix&other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         return false;
-    }    
+    }
+
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
             if (data[i][j] != other[i][j]) {
                 return false;
-            }    
-        }    
-    }    
+            }
+        }
+    }
     
     return true;
-}    
+}
 
-bool Matrix::operator!=(const Matrix &other) const {
+bool Matrix::operator!=(const Matrix&other) const {
     return !(this->operator==(other));
-}    
+}
 
 bool Matrix::operator!() const {
     return !(this->operator bool());
 }
 
 double *&Matrix::operator[](int row) {
-    checkArgs(row, 0);
+    if (row < 0 || row >= ROWS) {
+        throw std::out_of_range("Row index out of bounds.");
+    }
+
     return data[row];
 }
 
 const double *Matrix::operator[](int row) const {
-    checkArgs(row, 0);
+    if (row < 0 || row >= ROWS) {
+        throw std::out_of_range("Row index out of bounds.");
+    }
+
     return data[row];
 }
 
@@ -372,31 +400,27 @@ Matrix::operator bool() const {
     
     return false;
 }
-
-Matrix operator*(double scalar, const Matrix &matrix) {
-    Matrix result(matrix);
-    for (int i = 0; i < result.ROWS; ++i) {
-        result.multiplyRow(i, scalar);
-    }
     
-    return result;
+const Matrix operator*(double scalar, const Matrix &matrix) {
+    return matrix * scalar;
 }
 
-std::ostream& operator<<(std::ostream &os, const Matrix &matrix) {
-    for (int i = 0; i < matrix.ROWS; ++i) {
-        for (int j = 0; j < matrix.COLS; ++j) {
-            os << matrix[i][j] << " ";
+ostream& operator<<(ostream &os, const Matrix &matrix) {
+    int maxl = 1 + matrix.maxLength();
+    for (const double *row: matrix.data) {
+        for (int i = 0; i < matrix.COLS; ++i) {
+            os << std::setw(maxl) << row[i];
         }
         os << std::endl;
     }
-    
+
     return os;
 }
 
-std::istream& operator>>(std::istream &is, Matrix &matrix) {
-    for (int i = 0; i < matrix.ROWS; ++i) {
-        for (int j = 0; j < matrix.COLS; ++j) {
-            is >> matrix[i][j];
+istream& operator>>(istream &is, Matrix &matrix) {
+    for (double *&row: matrix.data) {
+        for (int i = 0; i < matrix.COLS; ++i) {
+            is >> row[i];
         }
     }
     
