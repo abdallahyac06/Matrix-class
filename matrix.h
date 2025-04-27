@@ -10,9 +10,9 @@ using std::vector;
 using std::ostream;
 using std::istream;
 
-template<typename T>
+template<typename T, T ZERO = T()>
 class Matrix {
-        private:
+    private:
         const int ROWS;
         const int COLS;
         
@@ -32,21 +32,31 @@ class Matrix {
             
             return maxl;
         }
-        
-        void multiplyRow(int row, T scalar) {
+
+        void setRow(int row, const T *values) {
+            if (row < 0 || row >= ROWS) {
+                throw std::out_of_range("Row index out of bounds.");
+            }
+            
             for (int i = 0; i < COLS; ++i) {
+                data[row][i] = values[i];
+            }
+        }
+        
+        void multiplyRow(int row, T scalar, int startCol = 0) {
+            for (int i = startCol; i < COLS; ++i) {
                 data[row][i] *= scalar;
             }
         }
         
-        void divideRow(int row, T scalar) {
-            for (int i = 0; i < COLS; ++i) {
+        void divideRow(int row, T scalar, int startCol = 0) {
+            for (int i = startCol; i < COLS; ++i) {
                 data[row][i] /= scalar;
             }
         }
         
-        void addMultipleRow(int targetRow, int sourceRow, T scalar) {
-            for (int i = 0; i < COLS; ++i) {
+        void addMultipleRow(int targetRow, int sourceRow, T scalar, int startCol = 0) {
+            for (int i = startCol; i < COLS; ++i) {
                 data[targetRow][i] += data[sourceRow][i] * scalar;
             }
         }
@@ -62,9 +72,9 @@ class Matrix {
             }
         }
 
-        Matrix(const Matrix<T>&other): Matrix(other.data, other.ROWS, other.COLS) {}
+        Matrix(const Matrix<T, ZERO> &other): Matrix(other.data, other.ROWS, other.COLS) {}
 
-        Matrix(Matrix<T> &&other): ROWS(other.ROWS), COLS(other.COLS) {
+        Matrix(Matrix<T, ZERO> &&other): ROWS(other.ROWS), COLS(other.COLS) {
             data = std::move(other.data);
             other.data.assign(ROWS, nullptr);
         }
@@ -97,16 +107,6 @@ class Matrix {
 
             if (values.size() != COLS) {
                 throw std::invalid_argument("The vector size must be equal to the number columns.");
-            }
-            
-            for (int i = 0; i < COLS; ++i) {
-                data[row][i] = values[i];
-            }
-        }
-
-        void setRow(int row, const T *values) {
-            if (row < 0 || row >= ROWS) {
-                throw std::out_of_range("Row index out of bounds.");
             }
             
             for (int i = 0; i < COLS; ++i) {
@@ -155,7 +155,7 @@ class Matrix {
             }
             
             for (int i = 0; i < COLS; ++i) {
-                if (data[row][i]) {
+                if (data[row][i] != ZERO) {
                     return false;
                 }
             }
@@ -169,7 +169,7 @@ class Matrix {
             }
 
             for (const T *row: data) {
-                if (row[col]) {
+                if (row[col] != ZERO) {
                     return false;
                 }
             }
@@ -178,18 +178,18 @@ class Matrix {
         }
 
         int rank() const {
-            Matrix<T> rrefMatrix(std::move(rref()));
+            Matrix<T, ZERO> refMatrix(ref());
             int rank = 0;
 
-            while (rank < ROWS && !rrefMatrix.isZeroRow(rank)) {
+            while (rank < ROWS && !refMatrix.isZeroRow(rank)) {
                 ++rank;
             }
 
             return rank;
         }
 
-        const Matrix<T> transpose() const {
-            Matrix<T> result(COLS, ROWS);
+        const Matrix<T, ZERO> transpose() const {
+            Matrix<T, ZERO> result(COLS, ROWS);
             for (int i = 0; i < ROWS; ++i) {
                 for (int j = 0; j < COLS; ++j) {
                     result[j][i] = data[i][j];
@@ -199,13 +199,13 @@ class Matrix {
             return result;
         }
 
-        const Matrix<T> ref() const {
-            Matrix<T> result(*this);
+        const Matrix<T, ZERO> ref() const {
+            Matrix<T, ZERO> result(*this);
             int r = 0, r0 = 0, c = 0;
             T pivot;
 
             while (r0 < ROWS && c < COLS) {
-                while (r < ROWS && result[r][c] == T()) {
+                while (r < ROWS && result[r][c] == ZERO) {
                     ++r;
                 }
                 if (r == ROWS) {
@@ -215,10 +215,10 @@ class Matrix {
                 }
 
                 std::swap(result[r], result[r0]);
-                pivot = result[r0][c];
                 for (int i = r0 + 1; i < ROWS; ++i) {
-                    if (result[i][c]) {
-                        result.addMultipleRow(i, r0, -result[i][c] / pivot);
+                    if (result[i][c] != ZERO) {
+                        result.addMultipleRow(i, r0, -result[i][c] / result[r0][c], c + 1);
+                        result[i][c] = ZERO;
                     }
                 }
                 r = ++r0;
@@ -228,12 +228,12 @@ class Matrix {
             return result;
         }
 
-        const Matrix<T> rref() const {
-            Matrix<T> result(*this);
+        const Matrix<T, ZERO> rref() const {
+            Matrix<T, ZERO> result(*this);
             int r = 0, r0 = 0, c = 0;
 
             while (r0 < ROWS && c < COLS) {
-                while (r < ROWS && result[r][c] == T()) {
+                while (r < ROWS && result[r][c] == ZERO) {
                     ++r;
                 }
                 if (r == ROWS) {
@@ -243,9 +243,9 @@ class Matrix {
                 }
 
                 std::swap(result[r], result[r0]);
-                result.divideRow(r0, result[r0][c]);
+                result.divideRow(r0, result[r0][c], c);
                 for (int i = 0; i < ROWS; ++i) {
-                    if (result[i][c] == T() && i != r0) {
+                    if (result[i][c] == ZERO && i != r0) {
                         result.addMultipleRow(i, r0, -result[i][c]);
                     }
                 }
@@ -256,7 +256,7 @@ class Matrix {
             return result;
         }
 
-        Matrix<T> &operator=(const Matrix<T>&other) {
+        Matrix<T, ZERO> &operator=(const Matrix<T, ZERO> &other) {
             if (&other == this) {
                 return *this;
             }
@@ -272,12 +272,12 @@ class Matrix {
             return *this;
         }
 
-        const Matrix<T> operator+(const Matrix<T>&other) const {
+        const Matrix<T, ZERO> operator+(const Matrix<T, ZERO> &other) const {
             if (ROWS != other.ROWS || COLS != other.COLS) {
                 throw std::logic_error("Matrix dimensions must match for addition.");
             }
 
-            Matrix<T> result(ROWS, COLS);
+            Matrix<T, ZERO> result(ROWS, COLS);
             for (int i = 0; i < ROWS; ++i) {
                 for (int j = 0; j < COLS; ++j) {
                     result[i][j] = data[i][j] + other[i][j];
@@ -287,12 +287,12 @@ class Matrix {
             return result;
         }
 
-        const Matrix<T> operator-(const Matrix<T>&other) const {
+        const Matrix<T, ZERO> operator-(const Matrix<T, ZERO> &other) const {
             if (ROWS != other.ROWS || COLS != other.COLS) {
                 throw std::logic_error("Matrix dimensions must match for subtraction.");
             }
 
-            Matrix<T> result(ROWS, COLS);
+            Matrix<T, ZERO> result(ROWS, COLS);
             for (int i = 0; i < ROWS; ++i) {
                 for (int j = 0; j < COLS; ++j) {
                     result[i][j] = data[i][j] - other[i][j];
@@ -302,8 +302,8 @@ class Matrix {
             return result;
         }
 
-        const Matrix<T> operator-() const {
-            Matrix<T> result(ROWS, COLS);
+        const Matrix<T, ZERO> operator-() const {
+            Matrix<T, ZERO> result(ROWS, COLS);
             for (int i = 0; i < ROWS; ++i) {
                 for (int j = 0; j < COLS; ++j) {
                     result[i][j] = -data[i][j];
@@ -313,15 +313,15 @@ class Matrix {
             return result;
         }
 
-        const Matrix<T> operator*(const Matrix<T>&other) const {
+        const Matrix<T, ZERO> operator*(const Matrix<T, ZERO> &other) const {
             if (COLS != other.ROWS) {
                 throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
             }
 
-            Matrix<T> result(ROWS, other.COLS);
+            Matrix<T, ZERO> result(ROWS, other.COLS);
             for (int i = 0; i < ROWS; ++i) {
                 for (int j = 0; j < other.COLS; ++j) {
-                    result[i][j] = T();
+                    result[i][j] = ZERO;
                     for (int k = 0; k < COLS; ++k) {
                         result[i][j] += data[i][k] * other[k][j];
                     }
@@ -331,8 +331,8 @@ class Matrix {
             return result;
         }
 
-        const Matrix<T> operator*(T scalar) const {
-            Matrix<T> result(*this);
+        const Matrix<T, ZERO> operator*(T scalar) const {
+            Matrix<T, ZERO> result(*this);
             for (int i = 0; i < ROWS; ++i) {
                 result.multiplyRow(i, scalar);
             }
@@ -340,8 +340,8 @@ class Matrix {
             return result;
         }
 
-        const Matrix<T> operator/(T scalar) const {
-            Matrix<T> result(*this);
+        const Matrix<T, ZERO> operator/(T scalar) const {
+            Matrix<T, ZERO> result(*this);
             for (int i = 0; i < ROWS; ++i) {
                 result.divideRow(i, scalar);
             }
@@ -349,27 +349,27 @@ class Matrix {
             return result;
         }
 
-        Matrix<T> &operator+=(const Matrix<T>&other) {
+        Matrix<T, ZERO> &operator+=(const Matrix<T, ZERO> &other) {
             return this->operator=(this->operator+(other));
         }
 
-        Matrix<T> &operator-=(const Matrix<T>&other) {
+        Matrix<T, ZERO> &operator-=(const Matrix<T, ZERO> &other) {
             return this->operator=(this->operator-(other));
         }
 
-        Matrix<T> &operator*=(const Matrix<T>&other) {
+        Matrix<T, ZERO> &operator*=(const Matrix<T, ZERO> &other) {
             return this->operator=(this->operator*(other));
         }
 
-        Matrix<T> &operator*=(T scalar) {
+        Matrix<T, ZERO> &operator*=(T scalar) {
             return this->operator=(this->operator*(scalar));
         }
 
-        Matrix<T> &operator/=(T scalar) {
+        Matrix<T, ZERO> &operator/=(T scalar) {
             return this->operator=(this->operator/(scalar));
         }
 
-        bool operator==(const Matrix<T>&other) const {
+        bool operator==(const Matrix<T, ZERO> &other) const {
             if (ROWS != other.ROWS || COLS != other.COLS) {
                 return false;
             }
@@ -385,7 +385,7 @@ class Matrix {
             return true;
         }
 
-        bool operator!=(const Matrix<T>&other) const {
+        bool operator!=(const Matrix<T, ZERO> &other) const {
             return !(this->operator==(other));
         }
 
@@ -419,11 +419,11 @@ class Matrix {
             return false;
         }
         
-    friend Matrix<T> operator*(T scalar, const Matrix<T> &matrix) {
+    friend Matrix<T, ZERO> operator*(T scalar, const Matrix<T, ZERO> &matrix) {
         return matrix * scalar;
     }
 
-    friend ostream& operator<<(ostream &os, const Matrix<T> &matrix) {
+    friend ostream& operator<<(ostream &os, const Matrix<T, ZERO> &matrix) {
         int maxl = 1 + matrix.maxLength();
         for (const T *row: matrix.data) {
             for (int i = 0; i < matrix.COLS; ++i) {
@@ -435,7 +435,7 @@ class Matrix {
         return os;
     }
 
-    friend istream& operator>>(istream &is, Matrix<T> &matrix) {
+    friend istream& operator>>(istream &is, Matrix<T, ZERO> &matrix) {
         for (T *row: matrix.data) {
             for (int i = 0; i < matrix.COLS; ++i) {
                 is >> row[i];
