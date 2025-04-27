@@ -56,20 +56,20 @@ void Matrix::setRow(int row, const double *values) {
     }
 }
 
-void Matrix::multiplyRow(int row, double scalar) {
-    for (int i = 0; i < COLS; ++i) {
+void Matrix::multiplyRow(int row, double scalar, int startCol) {
+    for (int i = startCol; i < COLS; ++i) {
         data[row][i] *= scalar;
     }
 }
 
-void Matrix::divideRow(int row, double scalar) {
-    for (int i = 0; i < COLS; ++i) {
+void Matrix::divideRow(int row, double scalar, int startCol) {
+    for (int i = startCol; i < COLS; ++i) {
         data[row][i] /= scalar;
     }
 }
 
-void Matrix::addMultipleRow(int targetRow, int sourceRow, double scalar) {
-    for (int i = 0; i < COLS; ++i) {
+void Matrix::addMultipleRow(int targetRow, int sourceRow, double scalar, int startCol) {
+    for (int i = startCol; i < COLS; ++i) {
         data[targetRow][i] += data[sourceRow][i] * scalar;
     }
 }
@@ -160,10 +160,10 @@ bool Matrix::isZeroCol(int col) const {
 }
 
 int Matrix::rank() const {
-    Matrix rrefMatrix(std::move(rref()));
+    Matrix refMatrix(ref());
     int rank = 0;
 
-    while (rank < ROWS && !rrefMatrix.isZeroRow(rank)) {
+    while (rank < ROWS && !refMatrix.isZeroRow(rank)) {
         ++rank;
     }
 
@@ -184,10 +184,9 @@ const Matrix Matrix::transpose() const {
 const Matrix Matrix::ref() const {
     Matrix result(*this);
     int r = 0, r0 = 0, c = 0;
-    double pivot;
 
     while (r0 < ROWS && c < COLS) {
-        while (r < ROWS && result[r][c] == double()) {
+        while (r < ROWS && result[r][c] == 0.0) {
             ++r;
         }
         if (r == ROWS) {
@@ -197,10 +196,10 @@ const Matrix Matrix::ref() const {
         }
 
         std::swap(result[r], result[r0]);
-        pivot = result[r0][c];
         for (int i = r0 + 1; i < ROWS; ++i) {
-            if (result[i][c]) {
-                result.addMultipleRow(i, r0, -result[i][c] / pivot);
+            if (result[i][c] != 0.0) {
+                result.addMultipleRow(i, r0, -result[i][c] / result[r0][c], c + 1);
+                result[i][c] = 0.0;
             }
         }
         r = ++r0;
@@ -215,7 +214,7 @@ const Matrix Matrix::rref() const {
     int r = 0, r0 = 0, c = 0;
 
     while (r0 < ROWS && c < COLS) {
-        while (r < ROWS && result[r][c] == double()) {
+        while (r < ROWS && !result[r][c]) {
             ++r;
         }
         if (r == ROWS) {
@@ -225,10 +224,10 @@ const Matrix Matrix::rref() const {
         }
 
         std::swap(result[r], result[r0]);
-        result.divideRow(r0, result[r0][c]);
+        result.divideRow(r0, result[r0][c], c);
         for (int i = 0; i < ROWS; ++i) {
-            if (result[i][c] == double() && i != r0) {
-                result.addMultipleRow(i, r0, -result[i][c]);
+            if (result[i][c] != 0.0 && i != r0) {
+                result.addMultipleRow(i, r0, -result[i][c], c);
             }
         }
         r = ++r0;

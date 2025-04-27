@@ -17,9 +17,8 @@ class SquareMatrix : public Matrix {
 
         double trace() const;
         double determinant() const;
-        double determinantRecursive() const;
-        bool isLTriangular() const;
-        bool isUTriangular() const;
+        bool isLowerTriangular() const;
+        bool isUpperTriangular() const;
         bool isDiagonal() const;
         bool isSymmetric() const;
         const SquareMatrix operator()(int row, int col) const;

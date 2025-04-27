@@ -17,9 +17,9 @@ class Matrix {
         vector<double*> data;
         size_t maxLength() const;
         void setRow(int row, const double *values);
-        void multiplyRow(int row, double scalar);
-        void divideRow(int row, double scalar);
-        void addMultipleRow(int targetRow, int sourceRow, double scalar);
+        void multiplyRow(int row, double scalar, int startCol = 0);
+        void divideRow(int row, double scalar, int startCol = 0);
+        void addMultipleRow(int targetRow, int sourceRow, double scalar, int startCol = 0);
 
     public:
         Matrix(int rows, int cols);
