@@ -17,7 +17,7 @@ class Matrix {
         const int ROWS;
         const int COLS;
         
-        protected:
+    protected:
         const T ZERO;
         vector<T*> data;
         size_t maxLength() const;
