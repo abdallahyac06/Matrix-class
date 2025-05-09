@@ -64,10 +64,13 @@ class Matrix {
         T *&operator[](int row);
         const T *operator[](int row) const;
         operator bool() const;
-        
-    friend const Matrix<T> operator*(T scalar, const Matrix<T> &matrix);
-    friend ostream& operator<<(ostream &os, const Matrix<T> &matrix); 
-    friend istream& operator>>(istream &is, Matrix<T> &matrix);
+    
+    template <typename U>
+    friend const Matrix<U> operator*(U scalar, const Matrix<U> &matrix);
+    template <typename U>
+    friend ostream& operator<<(ostream &os, const Matrix<U> &matrix); 
+    template <typename U>
+    friend istream& operator>>(istream &is, Matrix<U> &matrix);
 };
 
 template <typename T>
@@ -282,7 +285,7 @@ const Matrix<T> Matrix<T>::ref() const {
         while (r < ROWS && result[r][c] == ZERO) {
             ++r;
         }
-        if (r == ROWS) {
+        if (r >= ROWS) {
             r = r0;
             ++c;
             continue;
@@ -311,7 +314,7 @@ const Matrix<T> Matrix<T>::rref() const {
         while (r < ROWS && result[r][c] == ZERO) {
             ++r;
         }
-        if (r == ROWS) {
+        if (r >= ROWS) {
             r = r0;
             ++c;
             continue;
@@ -320,7 +323,7 @@ const Matrix<T> Matrix<T>::rref() const {
         std::swap(result[r], result[r0]);
         result.divideRow(r0, result[r0][c], c);
         for (int i = 0; i < ROWS; ++i) {
-            if (result[i][c] == ZERO && i != r0) {
+            if (result[i][c] != ZERO && i != r0) {
                 result.addMultipleRow(i, r0, -result[i][c]);
             }
         }
@@ -520,6 +523,7 @@ const Matrix<T> operator*(T scalar, const Matrix<T> &matrix) {
 template <typename T>
 ostream& operator<<(ostream &os, const Matrix<T> &matrix) {
     int maxl = 1 + matrix.maxLength();
+    os << std::left;
     for (const T *row: matrix.data) {
         for (int i = 0; i < matrix.COLS; ++i) {
             os << std::setw(maxl) << row[i];
@@ -527,7 +531,7 @@ ostream& operator<<(ostream &os, const Matrix<T> &matrix) {
         os << std::endl;
     }
 
-    return os;
+    return os << std::right;
 }
 
 template <typename T>
