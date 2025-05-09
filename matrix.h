@@ -27,10 +27,10 @@ class Matrix {
         void addMultipleRow(int targetRow, int sourceRow, T scalar, int startCol = 0);
 
     public:
-        Matrix(int rows, int cols, const T &zero = T());
+        Matrix(int rows = 4, int cols = 4, const T &zero = T());
         Matrix(const Matrix<T> &other);
         Matrix(Matrix<T> &&other);
-        Matrix(const vector<T*> &values, int rows, int cols, const T &zero = T());
+        Matrix(const vector<T*> &values, int rows = 4, int cols = 4, const T &zero = T());
         ~Matrix();
 
         int getRows() const;
@@ -436,27 +436,27 @@ const Matrix<T> Matrix<T>::operator/(T scalar) const {
 
 template <typename T>
 Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &other) {
-    return this->operator=(this->operator+(other));
+    return operator=(operator+(other));
 }
 
 template <typename T>
 Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &other) {
-    return this->operator=(this->operator-(other));
+    return operator=(operator-(other));
 }
 
 template <typename T>
 Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &other) {
-    return this->operator=(this->operator*(other));
+    return operator=(operator*(other));
 }
 
 template <typename T>
 Matrix<T> &Matrix<T>::operator*=(T scalar) {
-    return this->operator=(this->operator*(scalar));
+    return operator=(operator*(scalar));
 }
 
 template <typename T>
 Matrix<T> &Matrix<T>::operator/=(T scalar) {
-    return this->operator=(this->operator/(scalar));
+    return operator=(operator/(scalar));
 }
 
 template <typename T>
@@ -478,12 +478,12 @@ bool Matrix<T>::operator==(const Matrix<T> &other) const {
 
 template <typename T>
 bool Matrix<T>::operator!=(const Matrix<T> &other) const {
-    return !(this->operator==(other));
+    return !(operator==(other));
 }
 
 template <typename T>
 bool Matrix<T>::operator!() const {
-    return !(this->operator bool());
+    return !(operator bool());
 }
 
 template <typename T>
