@@ -42,22 +42,23 @@ class Matrix {
         bool isZeroRow(int row) const;
         bool isZeroCol(int col) const;
         int rank() const;
-        const Matrix<T> transpose() const;
-        const Matrix<T> ref() const;
-        const Matrix<T> rref() const;
+        Matrix<T> transpose() const;
+        Matrix<T> ref() const;
+        Matrix<T> rref() const;
 
         Matrix<T> &operator=(const Matrix<T>&other);
-        const Matrix<T> operator+(const Matrix<T>&other) const;
-        const Matrix<T> operator-(const Matrix<T>&other) const;
-        const Matrix<T> operator-() const;
-        const Matrix<T> operator*(const Matrix<T>&other) const;
-        const Matrix<T> operator*(T scalar) const;
-        const Matrix<T> operator/(T scalar) const;
+        Matrix<T> operator+(const Matrix<T>&other) const;
+        Matrix<T> operator-(const Matrix<T>&other) const;
+        Matrix<T> operator-() const;
+        Matrix<T> operator*(const Matrix<T>&other) const;
+        Matrix<T> operator*(T scalar) const;
+        Matrix<T> operator/(T scalar) const;
         Matrix<T> &operator+=(const Matrix<T>&other);
         Matrix<T> &operator-=(const Matrix<T>&other);
         Matrix<T> &operator*=(const Matrix<T>&other);
         Matrix<T> &operator*=(T scalar);
         Matrix<T> &operator/=(T scalar);
+
         bool operator==(const Matrix<T>&other) const;
         bool operator!=(const Matrix<T>&other) const;
         bool operator!() const;
@@ -66,7 +67,7 @@ class Matrix {
         operator bool() const;
     
     template <typename U>
-    friend const Matrix<U> operator*(U scalar, const Matrix<U> &matrix);
+    friend Matrix<U> operator*(U scalar, const Matrix<U> &matrix);
     template <typename U>
     friend ostream& operator<<(ostream &os, const Matrix<U> &matrix); 
     template <typename U>
@@ -264,7 +265,7 @@ int Matrix<T>::rank() const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::transpose() const {
+Matrix<T> Matrix<T>::transpose() const {
     Matrix<T> result(COLS, ROWS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
@@ -276,7 +277,7 @@ const Matrix<T> Matrix<T>::transpose() const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::ref() const {
+Matrix<T> Matrix<T>::ref() const {
     Matrix<T> result(*this);
     int r = 0, r0 = 0, c = 0;
     T pivot;
@@ -291,7 +292,7 @@ const Matrix<T> Matrix<T>::ref() const {
             continue;
         }
 
-        std::swap(result[r], result[r0]);
+        std::swap(result.data[r], result.data[r0]);
         for (int i = r0 + 1; i < ROWS; ++i) {
             if (result[i][c] != ZERO) {
                 result.addMultipleRow(i, r0, -result[i][c] / result[r0][c], c + 1);
@@ -306,7 +307,7 @@ const Matrix<T> Matrix<T>::ref() const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::rref() const {
+Matrix<T> Matrix<T>::rref() const {
     Matrix<T> result(*this);
     int r = 0, r0 = 0, c = 0;
 
@@ -320,7 +321,7 @@ const Matrix<T> Matrix<T>::rref() const {
             continue;
         }
 
-        std::swap(result[r], result[r0]);
+        std::swap(result.data[r], result.data[r0]);
         result.divideRow(r0, result[r0][c], c);
         for (int i = 0; i < ROWS; ++i) {
             if (result[i][c] != ZERO && i != r0) {
@@ -352,7 +353,7 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &other) {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) const {
+Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw std::logic_error("Matrix dimensions must match for addition.");
     }
@@ -368,7 +369,7 @@ const Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::operator-(const Matrix<T> &other) const {
+Matrix<T> Matrix<T>::operator-(const Matrix<T> &other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw std::logic_error("Matrix dimensions must match for subtraction.");
     }
@@ -384,7 +385,7 @@ const Matrix<T> Matrix<T>::operator-(const Matrix<T> &other) const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::operator-() const {
+Matrix<T> Matrix<T>::operator-() const {
     Matrix<T> result(ROWS, COLS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
@@ -396,7 +397,7 @@ const Matrix<T> Matrix<T>::operator-() const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::operator*(const Matrix<T> &other) const {
+Matrix<T> Matrix<T>::operator*(const Matrix<T> &other) const {
     if (COLS != other.ROWS) {
         throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
     }
@@ -415,7 +416,7 @@ const Matrix<T> Matrix<T>::operator*(const Matrix<T> &other) const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::operator*(T scalar) const {
+Matrix<T> Matrix<T>::operator*(T scalar) const {
     Matrix<T> result(*this);
     for (int i = 0; i < ROWS; ++i) {
         result.multiplyRow(i, scalar);
@@ -425,7 +426,7 @@ const Matrix<T> Matrix<T>::operator*(T scalar) const {
 }
 
 template <typename T>
-const Matrix<T> Matrix<T>::operator/(T scalar) const {
+Matrix<T> Matrix<T>::operator/(T scalar) const {
     Matrix<T> result(*this);
     for (int i = 0; i < ROWS; ++i) {
         result.divideRow(i, scalar);
@@ -516,14 +517,13 @@ Matrix<T>::operator bool() const {
 }
 
 template <typename T>
-const Matrix<T> operator*(T scalar, const Matrix<T> &matrix) {
+Matrix<T> operator*(T scalar, const Matrix<T> &matrix) {
     return matrix * scalar;
 }
 
 template <typename T>
 ostream& operator<<(ostream &os, const Matrix<T> &matrix) {
     int maxl = 1 + matrix.maxLength();
-    os << std::left;
     for (const T *row: matrix.data) {
         for (int i = 0; i < matrix.COLS; ++i) {
             os << std::setw(maxl) << row[i];
@@ -531,7 +531,7 @@ ostream& operator<<(ostream &os, const Matrix<T> &matrix) {
         os << std::endl;
     }
 
-    return os << std::right;
+    return os;
 }
 
 template <typename T>

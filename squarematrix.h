@@ -1,13 +1,17 @@
+#ifndef SQUAREMATRIX_H
+#define SQUAREMATRIX_H
+
 #include "matrix.h"
 #include <iostream>
 #include <vector>
 #include <stdexcept>
 
-#ifndef SQUAREMATRIX_H
-#define SQUAREMATRIX_H
 
 template <typename T>
 class SquareMatrix : public Matrix<T> {
+    private:
+        T determinantRecursive();
+
     public:
         SquareMatrix(int size = 4, const T &zero = T());
         SquareMatrix(const SquareMatrix<T> &other);
@@ -17,16 +21,16 @@ class SquareMatrix : public Matrix<T> {
         SquareMatrix(vector<T*> values, int size, const T &zero = T());
         virtual ~SquareMatrix() = default;
 
+        static const SquareMatrix<T> id(int size);
         T trace() const;
         T determinant() const;
-        T determinantRecursive() const;
         bool isLTriangular() const;
         bool isUTriangular() const;
         bool isDiagonal() const;
         bool isSymmetric() const;
-        const SquareMatrix<T> operator()(int row, int col) const;
-        const SquareMatrix<T> adjoint() const;
-        const SquareMatrix<T> inverse() const;
+        SquareMatrix<T> operator()(int row, int col) const;
+        SquareMatrix<T> adjoint() const;
+        SquareMatrix<T> inverse() const;
         SquareMatrix<T> &operator=(const SquareMatrix<T> &other);
 
     template <typename U>
@@ -65,65 +69,51 @@ template <typename T>
 SquareMatrix<T>::SquareMatrix(vector<T*> values, int size, const T &zero): Matrix<T>(values, size, size, zero) {}
 
 template <typename T>
+T SquareMatrix<T>::determinantRecursive() {
+    if (this->getRows() == 1) {
+        return this->data[0][0];
+    }
+
+    int r = 0;
+    while (r < this->getRows() && this->data[r][0] == this->ZERO) {
+        ++r;
+    }
+    if (r == this->getRows()) {
+        return this->ZERO;
+    }
+
+    for (int i = 0; i < this->getRows(); ++i) {
+        if (i != r && this->data[i][0] != this->ZERO) {
+            this->addMultipleRow(i, r, -this->data[i][0] / this->data[r][0]);
+        }
+    }
+
+    return (r & 1 ? -this->data[r][0] : this->data[r][0]) * operator()(r, 0).determinantRecursive();
+}
+
+template <typename T>
+const SquareMatrix<T> SquareMatrix<T>::id(int size) {
+    SquareMatrix<T> result(size);
+    for (int i = 0; i < size; ++i) {
+        result[i][i] = T(1);
+    }
+
+    return result;
+}
+
+template <typename T>
 T SquareMatrix<T>::trace() const {
     T result = this->ZERO;
     for (int i = 0; i < this->getRows(); ++i) {
         result += this->data[i][i];
     }
+
     return result;
 }
 
 template <typename T>
 T SquareMatrix<T>::determinant() const {
-    SquareMatrix<T> copy(*this);
-    int r = 0, c = 0;
-    T pivot;
-    bool even_swaps = true;
-
-    while (c < this->getCols()) {
-        while (r < this->getRows() && copy[r][c] == this->ZERO) {
-            ++r;
-        }
-        if (r == this->getRows()) {
-            return this->ZERO;
-        }
-        if (r != c) {
-            std::swap(copy[r], copy[c]);
-            even_swaps = !even_swaps;
-        }
-
-        pivot = copy[c][c];
-        for (int i = c + 1; i < this->getRows(); ++i) {
-            if (copy[i][c] != this->ZERO) {
-                copy.addMultipleRow(i, c, -copy[i][c] / pivot);
-            }
-        }
-        r = ++c;
-    }
-
-    T result = even_swaps ? copy[0][0] : -copy[0][0];
-    for (int i = 1; i < this->getRows(); ++i) {
-        result *= copy[i][i];
-    }
-
-    return result;
-}
-
-template <typename T>
-T SquareMatrix<T>::determinantRecursive() const {
-    if (this->getRows() == 1) {
-        return this->data[0][0];
-    }
-
-    T result = this->ZERO;
-    for (int i = 0; i < this->getRows(); i += 2) {
-        result += this->data[0][i] * operator()(0, i).determinantRecursive();
-    }
-    for (int i = 1; i < this->getRows(); i += 2) {
-        result -= this->data[0][i] * operator()(0, i).determinantRecursive();
-    }
-
-    return result;
+    return SquareMatrix<T>(*this).determinantRecursive();
 }
 
 template <typename T>
@@ -171,7 +161,7 @@ bool SquareMatrix<T>::isSymmetric() const {
 }
 
 template <typename T>
-const SquareMatrix<T> SquareMatrix<T>::operator()(int row, int col) const {
+SquareMatrix<T> SquareMatrix<T>::operator()(int row, int col) const {
     if (row < 0 || row >= this->getRows()) {
         throw std::out_of_range("Row index out of bounds.");
     }
@@ -191,7 +181,7 @@ const SquareMatrix<T> SquareMatrix<T>::operator()(int row, int col) const {
 }
 
 template <typename T>
-const SquareMatrix<T> SquareMatrix<T>::adjoint() const {
+SquareMatrix<T> SquareMatrix<T>::adjoint() const {
     SquareMatrix<T> result(this->getRows());
     for (int i = 0; i < this->getRows(); ++i) {
         for (int j = 0; j < this->getCols(); ++j) {
@@ -206,18 +196,38 @@ const SquareMatrix<T> SquareMatrix<T>::adjoint() const {
 }
 
 template <typename T>
-const SquareMatrix<T> SquareMatrix<T>::inverse() const {
-    T det = determinant();
-    if (det == this->ZERO) {
-        throw std::logic_error("This matrix is not invertible.");
+SquareMatrix<T> SquareMatrix<T>::inverse() const {
+    SquareMatrix<T> copy(*this), result(id(this->getRows()));
+    int r = 0, c = 0;
+
+    while (c < this->getCols()) {
+        while (r < this->getRows() && copy[r][c] == this->ZERO) {
+            ++r;
+        }
+        if (r == this->getRows()) {
+            throw std::logic_error("Matrix is singular.");
+        }
+
+        std::swap(result.data[r], result.data[c]);
+        std::swap(copy.data[r], copy.data[c]);
+        result.divideRow(c, copy[c][c]);
+        copy.divideRow(c, copy[c][c]);
+
+        for (int i = 0; i < this->getRows(); ++i) {
+            if (copy[i][c] != this->ZERO && i != c) {
+                result.addMultipleRow(i, c, -copy[i][c]);
+                copy.addMultipleRow(i, c, -copy[i][c]);
+            }
+        }
+        r = ++c;
     }
 
-    return SquareMatrix<T>(adjoint() / det);
+    return result;
 }
 
 template <typename T>
 SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &other) {
-    this->Matrix<T>::operator=(other);
+    Matrix<T>::operator=(other);
     return *this;
 }
 
