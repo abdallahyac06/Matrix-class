@@ -10,6 +10,9 @@ Matrix::Matrix(int rows, int cols): ROWS(rows), COLS(cols), data(ROWS, nullptr) 
     
     for (double *&row: data) {
         row = new double[COLS];
+        for (int i = 0; i < COLS; ++i) {
+            row[i] = 0.0;
+        }
     }
 }
 
@@ -186,7 +189,7 @@ const Matrix Matrix::ref() const {
     int r = 0, r0 = 0, c = 0;
 
     while (r0 < ROWS && c < COLS) {
-        while (r < ROWS && result[r][c] == 0.0) {
+        while (r < ROWS && !result[r][c]) {
             ++r;
         }
         if (r == ROWS) {
@@ -195,9 +198,9 @@ const Matrix Matrix::ref() const {
             continue;
         }
 
-        std::swap(result[r], result[r0]);
+        std::swap(result.data[r], result.data[r0]);
         for (int i = r0 + 1; i < ROWS; ++i) {
-            if (result[i][c] != 0.0) {
+            if (result[i][c]) {
                 result.addMultipleRow(i, r0, -result[i][c] / result[r0][c], c + 1);
                 result[i][c] = 0.0;
             }
@@ -223,10 +226,10 @@ const Matrix Matrix::rref() const {
             continue;
         }
 
-        std::swap(result[r], result[r0]);
+        std::swap(result.data[r], result.data[r0]);
         result.divideRow(r0, result[r0][c], c);
         for (int i = 0; i < ROWS; ++i) {
-            if (result[i][c] != 0.0 && i != r0) {
+            if (result[i][c] && i != r0) {
                 result.addMultipleRow(i, r0, -result[i][c], c);
             }
         }
@@ -331,23 +334,23 @@ const Matrix Matrix::operator/(double scalar) const {
 }
 
 Matrix &Matrix::Matrix::operator+=(const Matrix&other) {
-    return this->operator=(this->operator+(other));
+    return operator=(operator+(other));
 }
 
 Matrix &Matrix::operator-=(const Matrix&other) {
-    return this->operator=(this->operator-(other));
+    return operator=(operator-(other));
 }
 
 Matrix &Matrix::operator*=(const Matrix&other) {
-    return this->operator=(this->operator*(other));
+    return operator=(operator*(other));
 }
 
 Matrix &Matrix::operator*=(double scalar) {
-    return this->operator=(this->operator*(scalar));
+    return operator=(operator*(scalar));
 }
 
 Matrix &Matrix::operator/=(double scalar) {
-    return this->operator=(this->operator/(scalar));
+    return operator=(operator/(scalar));
 }
 
 bool Matrix::operator==(const Matrix&other) const {
@@ -367,11 +370,11 @@ bool Matrix::operator==(const Matrix&other) const {
 }
 
 bool Matrix::operator!=(const Matrix&other) const {
-    return !(this->operator==(other));
+    return !(operator==(other));
 }
 
 bool Matrix::operator!() const {
-    return !(this->operator bool());
+    return !(operator bool());
 }
 
 double *&Matrix::operator[](int row) {
@@ -406,6 +409,7 @@ const Matrix operator*(double scalar, const Matrix &matrix) {
 
 ostream& operator<<(ostream &os, const Matrix &matrix) {
     int maxl = 1 + matrix.maxLength();
+    os << std::left;
     for (const double *row: matrix.data) {
         for (int i = 0; i < matrix.COLS; ++i) {
             os << std::setw(maxl) << row[i];
@@ -413,7 +417,7 @@ ostream& operator<<(ostream &os, const Matrix &matrix) {
         os << std::endl;
     }
 
-    return os;
+    return os << std::right;
 }
 
 istream& operator>>(istream &is, Matrix &matrix) {

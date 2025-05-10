@@ -1,7 +1,7 @@
 #include "squarematrix.h"
 #include <stdexcept>
 
-SquareMatrix::SquareMatrix(int rows) : Matrix(rows, rows) {}
+SquareMatrix::SquareMatrix(int size) : Matrix(size, size) {}
 
 SquareMatrix::SquareMatrix(const SquareMatrix &other) : Matrix(other) {}
 
@@ -19,18 +19,9 @@ SquareMatrix::SquareMatrix(Matrix &&other) : Matrix(std::move(other)) {
     }
 }
 
-SquareMatrix::SquareMatrix(vector<double *> values, int rows) : Matrix(values, rows, rows) {}
+SquareMatrix::SquareMatrix(vector<double *> values, int size) : Matrix(values, size, size) {}
 
-double SquareMatrix::trace() const {
-    double result = 0;
-    for (int i = 0; i < getRows(); ++i) {
-        result += data[i][i];
-    }
-
-    return result;
-}
-
-double SquareMatrix::determinant() const {
+double SquareMatrix::determinantRecursive() {
     if (getRows() == 1) {
         return data[0][0];
     }
@@ -43,14 +34,35 @@ double SquareMatrix::determinant() const {
         return 0.0;
     }
 
-    SquareMatrix copy(*this);
     for (int i = 0; i < getRows(); ++i) {
-        if (i != r && copy.data[i][0]) {
-            copy.addMultipleRow(i, r, -copy.data[i][0] / copy.data[r][0]);
+        if (i != r && data[i][0]) {
+            addMultipleRow(i, r, -data[i][0] / data[r][0]);
         }
     }
 
-    return (r & 1 ? -copy[r][0] : copy[r][0]) * copy(r, 0).determinant();
+    return (r & 1 ? -data[r][0] : data[r][0]) * operator()(r, 0).determinant();
+}
+
+const SquareMatrix SquareMatrix::id(int size) {
+    SquareMatrix result(size);
+    for (int i = 0; i < size; ++i) {
+        result[i][i] = 1.0;
+    }
+
+    return result;
+}
+
+double SquareMatrix::trace() const {
+    double result = 0;
+    for (int i = 0; i < getRows(); ++i) {
+        result += data[i][i];
+    }
+
+    return result;
+}
+
+double SquareMatrix::determinant() const {
+    return SquareMatrix(*this).determinantRecursive();
 }
 
 bool SquareMatrix::isLowerTriangular() const {
@@ -116,7 +128,7 @@ const SquareMatrix SquareMatrix::adjoint() const {
     SquareMatrix result(getRows());
     for (int i = 0; i < getRows(); ++i) {
         for (int j = 0; j < getCols(); ++j) {
-            result[j][i] = ((i ^ j) & 1 ? -1.0 : 1.0) * this->operator()(i, j).determinant();
+            result[j][i] = ((i ^ j) & 1 ? -1.0 : 1.0) * operator()(i, j).determinant();
         }
     }
 
@@ -124,16 +136,36 @@ const SquareMatrix SquareMatrix::adjoint() const {
 }
 
 const SquareMatrix SquareMatrix::inverse() const {
-    double det = determinant();
-    if (det == 0) {
-        throw std::invalid_argument("Matrix is singular and cannot be inverted.");
+    SquareMatrix copy(*this), result(id(getRows()));
+    int r = 0, c = 0;
+
+    while (c < getCols()) {
+        while (r < getRows() && !copy[r][c]) {
+            ++r;
+        }
+        if (r == getRows()) {
+            throw std::logic_error("Matrix is singular.");
+        }
+
+        std::swap(result.data[r], result.data[c]);
+        std::swap(copy.data[r], copy.data[c]);
+        result.divideRow(c, copy[c][c]);
+        copy.divideRow(c, copy[c][c]);
+
+        for (int i = 0; i < getRows(); ++i) {
+            if (copy[i][c] && i != c) {
+                result.addMultipleRow(i, c, -copy[i][c]);
+                copy.addMultipleRow(i, c, -copy[i][c]);
+            }
+        }
+        r = ++c;
     }
 
-    return SquareMatrix(adjoint() / det);
+    return result;
 }
 
 SquareMatrix &SquareMatrix::operator=(const SquareMatrix &other) {
-    this->Matrix::operator=(other);
+    Matrix::operator=(other);
     return *this;
 }
 

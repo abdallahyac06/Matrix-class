@@ -22,10 +22,10 @@ class Matrix {
         void addMultipleRow(int targetRow, int sourceRow, double scalar, int startCol = 0);
 
     public:
-        Matrix(int rows, int cols);
+        Matrix(int rows = 2, int cols = 2);
         Matrix(const Matrix &other);
         Matrix(Matrix &&other);
-        Matrix(const vector<double*> &values, int rows, int cols);
+        Matrix(const vector<double*> &values, int rows = 2, int cols = 2);
         ~Matrix();
 
         int getRows() const;

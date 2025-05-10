@@ -6,6 +6,9 @@
 #define SQUAREMATRIX_H
 
 class SquareMatrix : public Matrix {
+    private:
+        double determinantRecursive();
+        
     public:
         SquareMatrix(int size = 1);
         SquareMatrix(const SquareMatrix &other);
@@ -15,6 +18,7 @@ class SquareMatrix : public Matrix {
         SquareMatrix(vector<double*> values, int size);
         virtual ~SquareMatrix() = default;
 
+        static const SquareMatrix id(int size);
         double trace() const;
         double determinant() const;
         bool isLowerTriangular() const;
