@@ -173,7 +173,7 @@ int Matrix::rank() const {
     return rank;
 }
 
-const Matrix Matrix::transpose() const {
+Matrix Matrix::transpose() const {
     Matrix result(COLS, ROWS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
@@ -184,7 +184,7 @@ const Matrix Matrix::transpose() const {
     return result;
 }
 
-const Matrix Matrix::ref() const {
+Matrix Matrix::ref() const {
     Matrix result(*this);
     int r = 0, r0 = 0, c = 0;
 
@@ -212,7 +212,7 @@ const Matrix Matrix::ref() const {
     return result;
 }
 
-const Matrix Matrix::rref() const {
+Matrix Matrix::rref() const {
     Matrix result(*this);
     int r = 0, r0 = 0, c = 0;
 
@@ -256,7 +256,7 @@ Matrix &Matrix::operator=(const Matrix&other) {
     return *this;
 }
 
-const Matrix Matrix::operator+(const Matrix&other) const {
+Matrix Matrix::operator+(const Matrix&other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw std::logic_error("Matrix dimensions must match for addition.");
     }
@@ -271,7 +271,7 @@ const Matrix Matrix::operator+(const Matrix&other) const {
     return result;
 }
 
-const Matrix Matrix::operator-(const Matrix&other) const {
+Matrix Matrix::operator-(const Matrix&other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw std::logic_error("Matrix dimensions must match for subtraction.");
     }
@@ -286,7 +286,7 @@ const Matrix Matrix::operator-(const Matrix&other) const {
     return result;
 }
 
-const Matrix Matrix::operator-() const {
+Matrix Matrix::operator-() const {
     Matrix result(ROWS, COLS);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
@@ -297,7 +297,7 @@ const Matrix Matrix::operator-() const {
     return result;
 }
 
-const Matrix Matrix::operator*(const Matrix&other) const {
+Matrix Matrix::operator*(const Matrix&other) const {
     if (COLS != other.ROWS) {
         throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
     }
@@ -315,7 +315,7 @@ const Matrix Matrix::operator*(const Matrix&other) const {
     return result;
 }
 
-const Matrix Matrix::operator*(double scalar) const {
+Matrix Matrix::operator*(double scalar) const {
     Matrix result(*this);
     for (int i = 0; i < ROWS; ++i) {
         result.multiplyRow(i, scalar);
@@ -324,7 +324,7 @@ const Matrix Matrix::operator*(double scalar) const {
     return result;
 }
 
-const Matrix Matrix::operator/(double scalar) const {
+Matrix Matrix::operator/(double scalar) const {
     Matrix result(*this);
     for (int i = 0; i < ROWS; ++i) {
         result.divideRow(i, scalar);
@@ -403,7 +403,7 @@ Matrix::operator bool() const {
     return false;
 }
     
-const Matrix operator*(double scalar, const Matrix &matrix) {
+Matrix operator*(double scalar, const Matrix &matrix) {
     return matrix * scalar;
 }
 

@@ -27,7 +27,7 @@ double SquareMatrix::determinantRecursive() {
     }
 
     int r = 0;
-    while (r < getRows() && data[r][0] == 0) {
+    while (r < getRows() && !data[r][0]) {
         ++r;
     }
     if (r == getRows()) {
@@ -40,10 +40,10 @@ double SquareMatrix::determinantRecursive() {
         }
     }
 
-    return (r & 1 ? -data[r][0] : data[r][0]) * operator()(r, 0).determinant();
+    return (r & 1 ? -data[r][0] : data[r][0]) * operator()(r, 0).determinantRecursive();
 }
 
-const SquareMatrix SquareMatrix::id(int size) {
+SquareMatrix SquareMatrix::id(int size) {
     SquareMatrix result(size);
     for (int i = 0; i < size; ++i) {
         result[i][i] = 1.0;
@@ -105,7 +105,7 @@ bool SquareMatrix::isSymmetric() const {
     return true;
 }
 
-const SquareMatrix SquareMatrix::operator()(int row, int col) const {
+SquareMatrix SquareMatrix::operator()(int row, int col) const {
     if (row < 0 || row >= getRows()) {
         throw std::out_of_range("Row index out of bounds.");
     }
@@ -124,7 +124,7 @@ const SquareMatrix SquareMatrix::operator()(int row, int col) const {
     return result;
 }
 
-const SquareMatrix SquareMatrix::adjoint() const {
+SquareMatrix SquareMatrix::adjoint() const {
     SquareMatrix result(getRows());
     for (int i = 0; i < getRows(); ++i) {
         for (int j = 0; j < getCols(); ++j) {
@@ -135,7 +135,7 @@ const SquareMatrix SquareMatrix::adjoint() const {
     return result;
 }
 
-const SquareMatrix SquareMatrix::inverse() const {
+SquareMatrix SquareMatrix::inverse() const {
     SquareMatrix copy(*this), result(id(getRows()));
     int r = 0, c = 0;
 
@@ -169,7 +169,7 @@ SquareMatrix &SquareMatrix::operator=(const SquareMatrix &other) {
     return *this;
 }
 
-const SquareMatrix operator*(double scalar, const SquareMatrix &matrix) {
+SquareMatrix operator*(double scalar, const SquareMatrix &matrix) {
     return SquareMatrix(matrix * scalar);
 }
 

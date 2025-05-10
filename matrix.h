@@ -37,17 +37,17 @@ class Matrix {
         bool isZeroRow(int row) const;
         bool isZeroCol(int col) const;
         int rank() const;
-        const Matrix transpose() const;
-        const Matrix ref() const;
-        const Matrix rref() const;
+        Matrix transpose() const;
+        Matrix ref() const;
+        Matrix rref() const;
 
         Matrix &operator=(const Matrix&other);
-        const Matrix operator+(const Matrix&other) const;
-        const Matrix operator-(const Matrix&other) const;
-        const Matrix operator-() const;
-        const Matrix operator*(const Matrix&other) const;
-        const Matrix operator*(double scalar) const;
-        const Matrix operator/(double scalar) const;
+        Matrix operator+(const Matrix&other) const;
+        Matrix operator-(const Matrix&other) const;
+        Matrix operator-() const;
+        Matrix operator*(const Matrix&other) const;
+        Matrix operator*(double scalar) const;
+        Matrix operator/(double scalar) const;
         Matrix &operator+=(const Matrix&other);
         Matrix &operator-=(const Matrix&other);
         Matrix &operator*=(const Matrix&other);
@@ -60,7 +60,7 @@ class Matrix {
         const double *operator[](int row) const;
         operator bool() const;
         
-    friend const Matrix operator*(double scalar, const Matrix &matrix);
+    friend Matrix operator*(double scalar, const Matrix &matrix);
     friend ostream& operator<<(ostream &os, const Matrix &matrix); 
     friend istream& operator>>(istream &is, Matrix &matrix);
 };
