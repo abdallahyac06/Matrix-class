@@ -1,9 +1,7 @@
-#include "matrix.h"
-#include <iostream>
-#include <vector>
-
 #ifndef SQUAREMATRIX_H
 #define SQUAREMATRIX_H
+
+#include "matrix.h"
 
 class SquareMatrix : public Matrix {
     private:

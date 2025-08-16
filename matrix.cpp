@@ -1,11 +1,12 @@
 #include "matrix.h"
-#include <stdexcept>
 #include <iomanip>
 #include <sstream>
 
+MatrixException::MatrixException(const std::string &message): std::runtime_error(message) {}
+
 Matrix::Matrix(int rows, int cols): ROWS(rows), COLS(cols), data(ROWS, nullptr) {
     if (ROWS < 1 || COLS < 1) {
-        throw std::invalid_argument("Matrix dimensions must be greater than 0.");
+        throw MatrixException("Matrix dimensions must be greater than 0.");
     }
     
     for (double *&row: data) {
@@ -51,7 +52,7 @@ size_t Matrix::maxLength() const {
 
 void Matrix::setRow(int row, const double *values) {
     if (row < 0 || row >= ROWS) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
     
     for (int i = 0; i < COLS; ++i) {
@@ -87,11 +88,11 @@ int Matrix::getCols() const {
 
 void Matrix::setRow(int row, const vector<double> &values) {
     if (row < 0 || row >= ROWS) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
 
     if (values.size() != COLS) {
-        throw std::invalid_argument("The vector size must be equal to the number columns.");
+        throw MatrixException("The vector size must be equal to the number columns.");
     }
     
     for (int i = 0; i < COLS; ++i) {
@@ -101,11 +102,11 @@ void Matrix::setRow(int row, const vector<double> &values) {
 
 void Matrix::setCol(int col, const vector<double> &values) {
     if (col < 0 || col >= COLS) {
-        throw std::out_of_range("Column index out of bounds.");
+        throw MatrixException("Column index out of bounds.");
     }
 
     if (values.size() != ROWS) {
-        throw std::invalid_argument("The vector size must be equal to the number rows.");
+        throw MatrixException("The vector size must be equal to the number rows.");
     }
 
     for (int i = 0; i < ROWS; ++i) {
@@ -115,7 +116,7 @@ void Matrix::setCol(int col, const vector<double> &values) {
 
 vector<double> Matrix::getRow(int row) const {
     if (row < 0 || row >= ROWS) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
 
     return vector<double>(data[row], data[row] + COLS);
@@ -123,7 +124,7 @@ vector<double> Matrix::getRow(int row) const {
 
 vector<double> Matrix::getCol(int col) const {
     if (col < 0 || col >= COLS) {
-        throw std::out_of_range("Column index out of bounds.");
+        throw MatrixException("Column index out of bounds.");
     }
     
     vector<double> result(ROWS);
@@ -136,7 +137,7 @@ vector<double> Matrix::getCol(int col) const {
 
 bool Matrix::isZeroRow(int row) const {
     if (row < 0 || row >= ROWS) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
     
     for (int i = 0; i < COLS; ++i) {
@@ -150,7 +151,7 @@ bool Matrix::isZeroRow(int row) const {
 
 bool Matrix::isZeroCol(int col) const {
     if (col < 0 || col >= COLS) {
-        throw std::out_of_range("Column index out of bounds.");
+        throw MatrixException("Column index out of bounds.");
     }
 
     for (const double *row: data) {
@@ -246,7 +247,7 @@ Matrix &Matrix::operator=(const Matrix&other) {
     }
 
     if (ROWS != other.ROWS || COLS != other.COLS) {
-        throw std::logic_error("Matrix dimensions must match for assignment.");
+        throw MatrixException("Matrix dimensions must match for assignment.");
     }
 
     for (int i = 0; i < ROWS; ++i) {
@@ -258,7 +259,7 @@ Matrix &Matrix::operator=(const Matrix&other) {
 
 Matrix Matrix::operator+(const Matrix&other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
-        throw std::logic_error("Matrix dimensions must match for addition.");
+        throw MatrixException("Matrix dimensions must match for addition.");
     }
 
     Matrix result(ROWS, COLS);
@@ -273,7 +274,7 @@ Matrix Matrix::operator+(const Matrix&other) const {
 
 Matrix Matrix::operator-(const Matrix&other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
-        throw std::logic_error("Matrix dimensions must match for subtraction.");
+        throw MatrixException("Matrix dimensions must match for subtraction.");
     }
 
     Matrix result(ROWS, COLS);
@@ -299,7 +300,7 @@ Matrix Matrix::operator-() const {
 
 Matrix Matrix::operator*(const Matrix&other) const {
     if (COLS != other.ROWS) {
-        throw std::logic_error("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
+        throw MatrixException("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
     }
 
     Matrix result(ROWS, other.COLS);
@@ -379,7 +380,7 @@ bool Matrix::operator!() const {
 
 double *&Matrix::operator[](int row) {
     if (row < 0 || row >= ROWS) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
 
     return data[row];
@@ -387,7 +388,7 @@ double *&Matrix::operator[](int row) {
 
 const double *Matrix::operator[](int row) const {
     if (row < 0 || row >= ROWS) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
 
     return data[row];

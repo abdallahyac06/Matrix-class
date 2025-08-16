@@ -1,25 +1,24 @@
 #include "squarematrix.h"
-#include <stdexcept>
 
-SquareMatrix::SquareMatrix(int size) : Matrix(size, size) {}
+SquareMatrix::SquareMatrix(int size): Matrix(size, size) {}
 
-SquareMatrix::SquareMatrix(const SquareMatrix &other) : Matrix(other) {}
+SquareMatrix::SquareMatrix(const SquareMatrix &other): Matrix(other) {}
 
-SquareMatrix::SquareMatrix(SquareMatrix &&other) : Matrix(std::move(other)) {}
+SquareMatrix::SquareMatrix(SquareMatrix &&other): Matrix(std::move(other)) {}
 
-SquareMatrix::SquareMatrix(const Matrix &other) : Matrix(other) {
+SquareMatrix::SquareMatrix(const Matrix &other): Matrix(other) {
     if (getRows() != getCols()) {
-        throw std::invalid_argument("Matrix is not square.");
+        throw MatrixException("Matrix is not square.");
     }
 }
 
-SquareMatrix::SquareMatrix(Matrix &&other) : Matrix(std::move(other)) {
+SquareMatrix::SquareMatrix(Matrix &&other): Matrix(std::move(other)) {
     if (getRows() != getCols()) {
-        throw std::invalid_argument("Matrix is not square.");
+        throw MatrixException("Matrix is not square.");
     }
 }
 
-SquareMatrix::SquareMatrix(vector<double *> values, int size) : Matrix(values, size, size) {}
+SquareMatrix::SquareMatrix(vector<double *> values, int size): Matrix(values, size, size) {}
 
 double SquareMatrix::determinantRecursive() {
     if (getRows() == 1) {
@@ -40,7 +39,7 @@ double SquareMatrix::determinantRecursive() {
         }
     }
 
-    return (r & 1 ? -data[r][0] : data[r][0]) * operator()(r, 0).determinantRecursive();
+    return (r & 1 ? -data[r][0]: data[r][0]) * operator()(r, 0).determinantRecursive();
 }
 
 SquareMatrix SquareMatrix::id(int size) {
@@ -107,11 +106,11 @@ bool SquareMatrix::isSymmetric() const {
 
 SquareMatrix SquareMatrix::operator()(int row, int col) const {
     if (row < 0 || row >= getRows()) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
 
     if (col < 0 || col >= getCols()) {
-        throw std::out_of_range("Column index out of bounds.");
+        throw MatrixException("Column index out of bounds.");
     }
 
     SquareMatrix result(getRows() - 1);
@@ -144,7 +143,7 @@ SquareMatrix SquareMatrix::inverse() const {
             ++r;
         }
         if (r == getRows()) {
-            throw std::logic_error("Matrix is singular.");
+            throw MatrixException("Matrix is singular.");
         }
 
         std::swap(result.data[r], result.data[c]);
@@ -178,7 +177,7 @@ std::ostream &operator<<(std::ostream &os, const SquareMatrix &matrix) {
 }
 
 std::istream &operator>>(std::istream &is, SquareMatrix &matrix) {
-    for (double *row : matrix.data) {
+    for (double *row: matrix.data) {
         for (int i = 0; i < matrix.getCols(); ++i) {
             is >> row[i];
         }

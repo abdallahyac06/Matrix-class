@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 
 using std::vector;
 using std::ostream;
@@ -63,6 +64,11 @@ class Matrix {
     friend Matrix operator*(double scalar, const Matrix &matrix);
     friend ostream& operator<<(ostream &os, const Matrix &matrix); 
     friend istream& operator>>(istream &is, Matrix &matrix);
+};
+
+class MatrixException : public std::runtime_error {
+    public:
+        explicit MatrixException(const std::string &message);
 };
 
 #endif
