@@ -9,11 +9,11 @@ class SquareMatrix : public Matrix {
         
     public:
         SquareMatrix(int size = 1);
-        SquareMatrix(const SquareMatrix &other);
-        SquareMatrix(SquareMatrix &&other);
-        SquareMatrix(const Matrix &other);
-        SquareMatrix(Matrix &&other);
-        SquareMatrix(vector<double*> values, int size);
+        SquareMatrix(const SquareMatrix& other);
+        SquareMatrix(SquareMatrix&& other);
+        SquareMatrix(const Matrix& other);
+        SquareMatrix(Matrix&& other);
+        SquareMatrix(const double* const* values, int size);
         virtual ~SquareMatrix() = default;
 
         static SquareMatrix id(int size);
@@ -26,11 +26,11 @@ class SquareMatrix : public Matrix {
         SquareMatrix operator()(int row, int col) const;
         SquareMatrix adjoint() const;
         SquareMatrix inverse() const;
-        SquareMatrix &operator=(const SquareMatrix &other);
+        SquareMatrix& operator=(const SquareMatrix& other);
 
-    friend SquareMatrix operator*(double scalar, const SquareMatrix &matrix);
-    friend ostream &operator<<(ostream &os, const SquareMatrix &matrix);
-    friend istream &operator>>(istream &is, SquareMatrix &matrix);
+    friend SquareMatrix operator*(double scalar, const SquareMatrix& matrix);
+    friend ostream& operator<<(ostream& os, const SquareMatrix& matrix);
+    friend istream& operator>>(istream& is, SquareMatrix& matrix);
 };
 
 #endif

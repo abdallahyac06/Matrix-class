@@ -2,23 +2,23 @@
 
 SquareMatrix::SquareMatrix(int size): Matrix(size, size) {}
 
-SquareMatrix::SquareMatrix(const SquareMatrix &other): Matrix(other) {}
+SquareMatrix::SquareMatrix(const SquareMatrix& other): Matrix(other) {}
 
-SquareMatrix::SquareMatrix(SquareMatrix &&other): Matrix(std::move(other)) {}
+SquareMatrix::SquareMatrix(SquareMatrix&& other): Matrix(std::move(other)) {}
 
-SquareMatrix::SquareMatrix(const Matrix &other): Matrix(other) {
+SquareMatrix::SquareMatrix(const Matrix& other): Matrix(other) {
     if (getRows() != getCols()) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
-SquareMatrix::SquareMatrix(Matrix &&other): Matrix(std::move(other)) {
+SquareMatrix::SquareMatrix(Matrix&& other): Matrix(std::move(other)) {
     if (getRows() != getCols()) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
-SquareMatrix::SquareMatrix(vector<double *> values, int size): Matrix(values, size, size) {}
+SquareMatrix::SquareMatrix(const double* const* values, int size): Matrix(values, size, size) {}
 
 double SquareMatrix::determinantRecursive() {
     if (getRows() == 1) {
@@ -163,21 +163,21 @@ SquareMatrix SquareMatrix::inverse() const {
     return result;
 }
 
-SquareMatrix &SquareMatrix::operator=(const SquareMatrix &other) {
+SquareMatrix& SquareMatrix::operator=(const SquareMatrix& other) {
     Matrix::operator=(other);
     return *this;
 }
 
-SquareMatrix operator*(double scalar, const SquareMatrix &matrix) {
+SquareMatrix operator*(double scalar, const SquareMatrix& matrix) {
     return SquareMatrix(matrix * scalar);
 }
 
-std::ostream &operator<<(std::ostream &os, const SquareMatrix &matrix) {
+std::ostream& operator<<(std::ostream& os, const SquareMatrix& matrix) {
     return os << Matrix(matrix);
 }
 
-std::istream &operator>>(std::istream &is, SquareMatrix &matrix) {
-    for (double *row: matrix.data) {
+std::istream& operator>>(std::istream& is, SquareMatrix& matrix) {
+    for (double*& row: matrix.data) {
         for (int i = 0; i < matrix.getCols(); ++i) {
             is >> row[i];
         }
