@@ -2,8 +2,6 @@
 #define SQUAREMATRIX_H
 
 #include "matrix.hpp"
-#include <iostream>
-#include <vector>
 
 template <typename T>
 class SquareMatrix : public Matrix<T> {
@@ -11,12 +9,12 @@ class SquareMatrix : public Matrix<T> {
         T determinantRecursive();
 
     public:
-        SquareMatrix(int size = 4, const T &zero = T());
-        SquareMatrix(const SquareMatrix<T> &other);
-        SquareMatrix(SquareMatrix<T> &&other);
-        SquareMatrix(const Matrix<T> &other);
+        SquareMatrix(int size = 1, const T& zero = T());
+        SquareMatrix(const SquareMatrix<T>& other);
+        SquareMatrix(SquareMatrix<T>&& other);
+        SquareMatrix(const Matrix<T>& other);
         SquareMatrix(Matrix<T> &&other);
-        SquareMatrix(vector<T*> values, int size, const T &zero = T());
+        SquareMatrix(const T* const* values, int size, const T& zero = T());
         virtual ~SquareMatrix() = default;
 
         static const SquareMatrix<T> id(int size);
@@ -29,14 +27,14 @@ class SquareMatrix : public Matrix<T> {
         SquareMatrix<T> operator()(int row, int col) const;
         SquareMatrix<T> adjoint() const;
         SquareMatrix<T> inverse() const;
-        SquareMatrix<T> &operator=(const SquareMatrix<T> &other);
+        SquareMatrix<T>& operator=(const SquareMatrix<T>& other);
 
     template <typename U>
-    friend const SquareMatrix<U> operator*(U scalar, const SquareMatrix<U> &matrix);
+    friend const SquareMatrix<U> operator*(U scalar, const SquareMatrix<U>& matrix);
     template <typename U>
-    friend ostream &operator<<(ostream &os, const SquareMatrix<U> &matrix);
+    friend ostream& operator<<(ostream& os, const SquareMatrix<U>& matrix);
     template <typename U>
-    friend istream &operator>>(istream &is, SquareMatrix<U> &matrix);
+    friend istream& operator>>(istream& is, SquareMatrix<U>& matrix);
 };
 
 #include "squarematrix.tpp"

@@ -1,31 +1,30 @@
 #include "squarematrix.hpp"
-#include <stdexcept>
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(int size, const T &zero): Matrix<T>(size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(int size, const T& zero): Matrix<T>(size, size, zero) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const SquareMatrix<T> &other): Matrix<T>(other) {}
+SquareMatrix<T>::SquareMatrix(const SquareMatrix<T>& other): Matrix<T>(other) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(SquareMatrix<T> &&other): Matrix<T>(std::move(other)) {}
+SquareMatrix<T>::SquareMatrix(SquareMatrix<T>&& other): Matrix<T>(std::move(other)) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const Matrix<T> &other): Matrix<T>(other) {
+SquareMatrix<T>::SquareMatrix(const Matrix<T>& other): Matrix<T>(other) {
     if (this->getRows() != this->getCols()) {
-        throw std::invalid_argument("Matrix is not square.");
+        throw MatrixException("Matrix is not square.");
     }
 }
 
 template <typename T>
 SquareMatrix<T>::SquareMatrix(Matrix<T> &&other): Matrix<T>(std::move(other)) {
     if (this->getRows() != this->getCols()) {
-        throw std::invalid_argument("Matrix is not square.");
+        throw MatrixException("Matrix is not square.");
     }
 }
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(vector<T*> values, int size, const T &zero): Matrix<T>(values, size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(const T* const* values, int size, const T& zero): Matrix<T>(values, size, size, zero) {}
 
 template <typename T>
 T SquareMatrix<T>::determinantRecursive() {
@@ -122,11 +121,11 @@ bool SquareMatrix<T>::isSymmetric() const {
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::operator()(int row, int col) const {
     if (row < 0 || row >= this->getRows()) {
-        throw std::out_of_range("Row index out of bounds.");
+        throw MatrixException("Row index out of bounds.");
     }
 
     if (col < 0 || col >= this->getCols()) {
-        throw std::out_of_range("Column index out of bounds.");
+        throw MatrixException("Column index out of bounds.");
     }
     
     SquareMatrix<T> result(this->getRows() - 1);
@@ -164,7 +163,7 @@ SquareMatrix<T> SquareMatrix<T>::inverse() const {
             ++r;
         }
         if (r == this->getRows()) {
-            throw std::logic_error("Matrix is singular.");
+            throw MatrixException("Matrix is singular.");
         }
 
         std::swap(result.data[r], result.data[c]);
@@ -185,28 +184,22 @@ SquareMatrix<T> SquareMatrix<T>::inverse() const {
 }
 
 template <typename T>
-SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &other) {
+SquareMatrix<T>& SquareMatrix<T>::operator=(const SquareMatrix<T>& other) {
     Matrix<T>::operator=(other);
     return *this;
 }
 
 template <typename T>
-const SquareMatrix<T> operator*(T scalar, const SquareMatrix<T> &matrix) {
+const SquareMatrix<T> operator*(T scalar, const SquareMatrix<T>& matrix) {
     return SquareMatrix<T>(matrix * scalar);
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream &os, const SquareMatrix<T> &matrix) {
+std::ostream& operator<<(std::ostream& os, const SquareMatrix<T>& matrix) {
     return os << Matrix<T>(matrix);
 }
 
 template <typename T>
-std::istream& operator>>(std::istream &is, SquareMatrix<T> &matrix) {
-    for (T *row: matrix.data) {
-        for (int i = 0; i < matrix.getCols(); ++i) {
-            is >> row[i];
-        }
-    }
-    
-    return is;
+std::istream& operator>>(std::istream& is, SquareMatrix<T>& matrix) {
+    return is >> static_cast<Matrix<T>&>(matrix);
 }
