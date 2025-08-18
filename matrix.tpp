@@ -2,7 +2,14 @@
 #include <iomanip>
 #include <sstream>
 
-MatrixException::MatrixException(const std::string& message): std::runtime_error(message) {}
+using std::move;
+using std::stringstream;
+using std::swap;
+using std::max;
+using std::setw;
+using std::endl;
+
+MatrixException::MatrixException(const string& message): runtime_error(message) {}
 
 template <typename T>
 Matrix<T>::Matrix(int rows, int cols, const T& zero): ROWS(rows), COLS(cols), ZERO(zero), data(ROWS, nullptr) {
@@ -22,8 +29,8 @@ template <typename T>
 Matrix<T>::Matrix(const Matrix<T>& other): Matrix(other.data.data(), other.ROWS, other.COLS, other.ZERO) {}
 
 template <typename T>
-Matrix<T>::Matrix(Matrix<T> &&other): ROWS(other.ROWS), COLS(other.COLS), ZERO(other.ZERO) {
-    data = std::move(other.data);
+Matrix<T>::Matrix(Matrix<T>&& other): ROWS(other.ROWS), COLS(other.COLS), ZERO(other.ZERO) {
+    data = move(other.data);
     other.data.assign(ROWS, nullptr);
 }
 
@@ -45,12 +52,12 @@ Matrix<T>::~Matrix() {
 template <typename T>
 size_t Matrix<T>::maxLength() const {
     size_t maxl = 0;
-    std::stringstream ss;
+    stringstream ss;
     for (const T* row: data) {
         for (int i = 0; i < COLS; ++i) {
             ss.str("");
             ss << row[i];
-            maxl = std::max(maxl, ss.str().length());
+            maxl = max(maxl, ss.str().length());
         }
     }
     
@@ -222,7 +229,7 @@ Matrix<T> Matrix<T>::ref() const {
             continue;
         }
 
-        std::swap(result.data[r], result.data[r0]);
+        swap(result[r], result[r0]);
         for (int i = r0 + 1; i < ROWS; ++i) {
             if (result[i][c] != ZERO) {
                 result.addMultipleRow(i, r0, -result[i][c] / result[r0][c], c + 1);
@@ -251,7 +258,7 @@ Matrix<T> Matrix<T>::rref() const {
             continue;
         }
 
-        std::swap(result.data[r], result.data[r0]);
+        swap(result[r], result[r0]);
         result.divideRow(r0, result[r0][c], c);
         for (int i = 0; i < ROWS; ++i) {
             if (result[i][c] != ZERO && i != r0) {
@@ -456,9 +463,9 @@ ostream& operator<<(ostream& os, const Matrix<T>& matrix) {
     int maxl = 1 + matrix.maxLength();
     for (const T* row: matrix.data) {
         for (int i = 0; i < matrix.COLS; ++i) {
-            os << std::setw(maxl) << row[i];
+            os << setw(maxl) << row[i];
         }
-        os << std::endl;
+        os << endl;
     }
 
     return os;

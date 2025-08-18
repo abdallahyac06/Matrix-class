@@ -8,6 +8,8 @@
 using std::vector;
 using std::ostream;
 using std::istream;
+using std::runtime_error;
+using std::string;
 
 template <typename T>
 class Matrix {
@@ -27,7 +29,7 @@ class Matrix {
     public:
         Matrix(int rows = 1, int cols = 1, const T& zero = T());
         Matrix(const Matrix<T>& other);
-        Matrix(Matrix<T> &&other);
+        Matrix(Matrix<T>&& other);
         Matrix(const T* const* values, int rows = 1, int cols = 1, const T& zero = T());
         ~Matrix();
 
@@ -44,37 +46,35 @@ class Matrix {
         Matrix<T> ref() const;
         Matrix<T> rref() const;
 
-        Matrix<T>& operator=(const Matrix<T>&other);
-        Matrix<T> operator+(const Matrix<T>&other) const;
-        Matrix<T> operator-(const Matrix<T>&other) const;
+        Matrix<T>& operator=(const Matrix<T>& other);
+        Matrix<T> operator+(const Matrix<T>& other) const;
+        Matrix<T> operator-(const Matrix<T>& other) const;
         Matrix<T> operator-() const;
-        Matrix<T> operator*(const Matrix<T>&other) const;
+        Matrix<T> operator*(const Matrix<T>& other) const;
         Matrix<T> operator*(T scalar) const;
         Matrix<T> operator/(T scalar) const;
-        Matrix<T>& operator+=(const Matrix<T>&other);
-        Matrix<T>& operator-=(const Matrix<T>&other);
-        Matrix<T>& operator*=(const Matrix<T>&other);
+        Matrix<T>& operator+=(const Matrix<T>& other);
+        Matrix<T>& operator-=(const Matrix<T>& other);
+        Matrix<T>& operator*=(const Matrix<T>& other);
         Matrix<T>& operator*=(T scalar);
         Matrix<T>& operator/=(T scalar);
 
-        bool operator==(const Matrix<T>&other) const;
-        bool operator!=(const Matrix<T>&other) const;
+        bool operator==(const Matrix<T>& other) const;
+        bool operator!=(const Matrix<T>& other) const;
         bool operator!() const;
         T*& operator[](int row);
         const T* operator[](int row) const;
         operator bool() const;
     
     template <typename U>
-    friend Matrix<U> operator*(U scalar, const Matrix<U>& matrix);
-    template <typename U>
     friend ostream& operator<<(ostream& os, const Matrix<U>& matrix); 
     template <typename U>
     friend istream& operator>>(istream& is, Matrix<U>& matrix);
 };
 
-class MatrixException : public std::runtime_error {
+class MatrixException : public runtime_error {
     public:
-        explicit MatrixException(const std::string& message);
+        explicit MatrixException(const string& message);
 };
 
 #include "matrix.tpp"

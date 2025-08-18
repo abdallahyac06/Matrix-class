@@ -1,30 +1,30 @@
 #include "squarematrix.hpp"
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(int size, const T& zero): Matrix<T>(size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(int size, const T& zero) : Matrix<T>(size, size, zero) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const SquareMatrix<T>& other): Matrix<T>(other) {}
+SquareMatrix<T>::SquareMatrix(const SquareMatrix<T>& other) : Matrix<T>(other) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(SquareMatrix<T>&& other): Matrix<T>(std::move(other)) {}
+SquareMatrix<T>::SquareMatrix(SquareMatrix<T>&& other) : Matrix<T>(move(other)) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const Matrix<T>& other): Matrix<T>(other) {
+SquareMatrix<T>::SquareMatrix(const Matrix<T>& other) : Matrix<T>(other) {
     if (this->getRows() != this->getCols()) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(Matrix<T> &&other): Matrix<T>(std::move(other)) {
+SquareMatrix<T>::SquareMatrix(Matrix<T>&& other) : Matrix<T>(move(other)) {
     if (this->getRows() != this->getCols()) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const T* const* values, int size, const T& zero): Matrix<T>(values, size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(const T* const* values, int size, const T& zero) : Matrix<T>(values, size, size, zero) {}
 
 template <typename T>
 T SquareMatrix<T>::determinantRecursive() {
@@ -50,10 +50,136 @@ T SquareMatrix<T>::determinantRecursive() {
 }
 
 template <typename T>
-const SquareMatrix<T> SquareMatrix<T>::id(int size) {
+SquareMatrix<T> SquareMatrix<T>::transpose() const {
+    return SquareMatrix<T>(Matrix<T>::transpose());
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::ref() const {
+    SquareMatrix<T> result(*this);
+    int r = 0, c = 0;
+    T pivot;
+
+    while (c < this->getCols()) {
+        while (r < this->getRows() && result[r][c] == this->ZERO) {
+            ++r;
+        }
+        if (r == this->getRows()) {
+            r = c++;
+            continue;
+        }
+
+        swap(result[r], result[c]);
+        for (int i = c + 1; i < this->getRows(); ++i) {
+            if (result[i][c] != this->ZERO) {
+                result.addMultipleRow(i, c, -result[i][c] / result[c][c], c + 1);
+                result[i][c] = this->ZERO;
+            }
+        }
+        r = ++c;
+    }
+    
+    return result;
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::rref() const {
+    SquareMatrix<T> result(*this);
+    int r = 0, c = 0;
+
+    while (c < this->getCols()) {
+        while (r < this->getRows() && result[r][c] == this->ZERO) {
+            ++r;
+        }
+        if (r == this->getRows()) {
+            r = c++;
+            continue;
+        }
+
+        swap(result[r], result[c]);
+        result.divideRow(c, result[c][c], c);
+        for (int i = 0; i < this->getRows(); ++i) {
+            if (result[i][c] != this->ZERO && i != c) {
+                result.addMultipleRow(i, c, -result[i][c]);
+            }
+        }
+        r = ++c;
+    }
+
+    return result;
+}
+
+template <typename T>
+SquareMatrix<T>& SquareMatrix<T>::operator=(const SquareMatrix<T>& other) {
+    Matrix<T>::operator=(other);
+    return *this;
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::operator+(const Matrix<T>& other) const {
+    return SquareMatrix<T>(Matrix<T>::operator+(other));
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::operator-(const Matrix<T>& other) const {
+    return SquareMatrix<T>(Matrix<T>::operator-(other));
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::operator-() const {
+    return SquareMatrix<T>(Matrix<T>::operator-());
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::operator*(const SquareMatrix<T>& other) const {
+    return SquareMatrix<T>(Matrix<T>::operator*(other));
+}
+
+template <typename T>
+Matrix<T> SquareMatrix<T>::operator*(const Matrix<T>& other) const {
+    return Matrix<T>::operator*(other);
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::operator*(T scalar) const {
+    return SquareMatrix<T>(Matrix<T>::operator*(scalar));
+}
+
+template <typename T>
+SquareMatrix<T> SquareMatrix<T>::operator/(T scalar) const {
+    return SquareMatrix<T>(Matrix<T>::operator/(scalar));
+}
+
+template <typename T>
+SquareMatrix<T>& SquareMatrix<T>::operator+=(const Matrix<T>& other) {
+    return operator=(operator+(other));
+}
+
+template <typename T>
+SquareMatrix<T>& SquareMatrix<T>::operator-=(const Matrix<T>& other) {
+    return operator=(operator-(other));
+}
+
+template <typename T>
+SquareMatrix<T>& SquareMatrix<T>::operator*=(const Matrix<T>& other) {
+    return operator=(operator*(other));
+}
+
+template <typename T>
+SquareMatrix<T>& SquareMatrix<T>::operator*=(T scalar) {
+    return operator=(operator*(scalar));
+}
+
+template <typename T>
+SquareMatrix<T>& SquareMatrix<T>::operator/=(T scalar) {
+    return operator=(operator/(scalar));
+}
+
+template <typename T>
+const SquareMatrix<T> SquareMatrix<T>::id(int size, T scalar) {
     SquareMatrix<T> result(size);
     for (int i = 0; i < size; ++i) {
-        result[i][i] = T(1);
+        result[i][i] = scalar;
     }
 
     return result;
@@ -143,7 +269,7 @@ SquareMatrix<T> SquareMatrix<T>::adjoint() const {
     SquareMatrix<T> result(this->getRows());
     for (int i = 0; i < this->getRows(); ++i) {
         for (int j = 0; j < this->getCols(); ++j) {
-            result[j][i] = operator()(i, j).determinant();
+            result[j][i] = operator()(i, j).determinantRecursive();
             if ((i ^ j) & 1) {
                 result[j][i] = -result[j][i];
             }
@@ -166,8 +292,8 @@ SquareMatrix<T> SquareMatrix<T>::inverse() const {
             throw MatrixException("Matrix is singular.");
         }
 
-        std::swap(result.data[r], result.data[c]);
-        std::swap(copy.data[r], copy.data[c]);
+        swap(result.data[r], result.data[c]);
+        swap(copy.data[r], copy.data[c]);
         result.divideRow(c, copy[c][c]);
         copy.divideRow(c, copy[c][c]);
 
@@ -184,22 +310,16 @@ SquareMatrix<T> SquareMatrix<T>::inverse() const {
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator=(const SquareMatrix<T>& other) {
-    Matrix<T>::operator=(other);
-    return *this;
+SquareMatrix<T> operator*(T scalar, const SquareMatrix<T>& matrix) {
+    return matrix * scalar;
 }
 
 template <typename T>
-const SquareMatrix<T> operator*(T scalar, const SquareMatrix<T>& matrix) {
-    return SquareMatrix<T>(matrix * scalar);
-}
-
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const SquareMatrix<T>& matrix) {
+ostream& operator<<(ostream& os, const SquareMatrix<T>& matrix) {
     return os << Matrix<T>(matrix);
 }
 
 template <typename T>
-std::istream& operator>>(std::istream& is, SquareMatrix<T>& matrix) {
+istream& operator>>(istream& is, SquareMatrix<T>& matrix) {
     return is >> static_cast<Matrix<T>&>(matrix);
 }

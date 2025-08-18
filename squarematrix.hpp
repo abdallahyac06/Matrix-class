@@ -13,11 +13,28 @@ class SquareMatrix : public Matrix<T> {
         SquareMatrix(const SquareMatrix<T>& other);
         SquareMatrix(SquareMatrix<T>&& other);
         SquareMatrix(const Matrix<T>& other);
-        SquareMatrix(Matrix<T> &&other);
+        SquareMatrix(Matrix<T>&& other);
         SquareMatrix(const T* const* values, int size, const T& zero = T());
         virtual ~SquareMatrix() = default;
 
-        static const SquareMatrix<T> id(int size);
+        SquareMatrix<T> transpose() const;
+        SquareMatrix<T> ref() const;
+        SquareMatrix<T> rref() const;
+        SquareMatrix<T>& operator=(const SquareMatrix<T>& other);
+        SquareMatrix<T> operator+(const Matrix<T>& other) const;
+        SquareMatrix<T> operator-(const Matrix<T>& other) const;
+        SquareMatrix<T> operator-() const;
+        SquareMatrix<T> operator*(const SquareMatrix<T>& other) const;
+        Matrix<T> operator*(const Matrix<T>& other) const;
+        SquareMatrix<T> operator*(T scalar) const;
+        SquareMatrix<T> operator/(T scalar) const;
+        SquareMatrix<T>& operator+=(const Matrix<T>& other);
+        SquareMatrix<T>& operator-=(const Matrix<T>& other);
+        SquareMatrix<T>& operator*=(const Matrix<T>& other);
+        SquareMatrix<T>& operator*=(T scalar);
+        SquareMatrix<T>& operator/=(T scalar);
+
+        static const SquareMatrix<T> id(int size, T scalar = T(1));
         T trace() const;
         T determinant() const;
         bool isLTriangular() const;
@@ -27,14 +44,6 @@ class SquareMatrix : public Matrix<T> {
         SquareMatrix<T> operator()(int row, int col) const;
         SquareMatrix<T> adjoint() const;
         SquareMatrix<T> inverse() const;
-        SquareMatrix<T>& operator=(const SquareMatrix<T>& other);
-
-    template <typename U>
-    friend const SquareMatrix<U> operator*(U scalar, const SquareMatrix<U>& matrix);
-    template <typename U>
-    friend ostream& operator<<(ostream& os, const SquareMatrix<U>& matrix);
-    template <typename U>
-    friend istream& operator>>(istream& is, SquareMatrix<U>& matrix);
 };
 
 #include "squarematrix.tpp"
