@@ -8,6 +8,8 @@
 using std::vector;
 using std::ostream;
 using std::istream;
+using std::runtime_error;
+using std::string;
 
 class Matrix {
     private:
@@ -66,9 +68,9 @@ class Matrix {
     friend istream& operator>>(istream& is, Matrix& matrix);
 };
 
-class MatrixException : public std::runtime_error {
+class MatrixException : public runtime_error {
     public:
-        explicit MatrixException(const std::string& message);
+        explicit MatrixException(const string& message);
 };
 
 #endif

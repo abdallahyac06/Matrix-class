@@ -13,8 +13,25 @@ class SquareMatrix : public Matrix {
         SquareMatrix(SquareMatrix&& other);
         SquareMatrix(const Matrix& other);
         SquareMatrix(Matrix&& other);
-        SquareMatrix(const double* const* values, int size);
+        SquareMatrix(const double* const* values, int size = 1);
         virtual ~SquareMatrix() = default;
+
+        SquareMatrix transpose() const;
+        SquareMatrix ref() const;
+        SquareMatrix rref() const;
+        SquareMatrix& operator=(const SquareMatrix& other);
+        SquareMatrix operator+(const Matrix& other) const;
+        SquareMatrix operator-(const Matrix& other) const;
+        SquareMatrix operator-() const;
+        SquareMatrix operator*(const SquareMatrix& other) const;
+        Matrix operator*(const Matrix& other) const;
+        SquareMatrix operator*(double scalar) const;
+        SquareMatrix operator/(double scalar) const;
+        SquareMatrix& operator+=(const Matrix& other);
+        SquareMatrix& operator-=(const Matrix& other);
+        SquareMatrix& operator*=(const Matrix& other);
+        SquareMatrix& operator*=(double scalar);
+        SquareMatrix& operator/=(double scalar);
 
         static SquareMatrix id(int size);
         double trace() const;
@@ -26,11 +43,6 @@ class SquareMatrix : public Matrix {
         SquareMatrix operator()(int row, int col) const;
         SquareMatrix adjoint() const;
         SquareMatrix inverse() const;
-        SquareMatrix& operator=(const SquareMatrix& other);
-
-    friend SquareMatrix operator*(double scalar, const SquareMatrix& matrix);
-    friend ostream& operator<<(ostream& os, const SquareMatrix& matrix);
-    friend istream& operator>>(istream& is, SquareMatrix& matrix);
 };
 
 #endif

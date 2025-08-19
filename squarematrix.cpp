@@ -1,10 +1,14 @@
 #include "squarematrix.h"
 
+using std::move;
+using std::swap;
+
+
 SquareMatrix::SquareMatrix(int size): Matrix(size, size) {}
 
 SquareMatrix::SquareMatrix(const SquareMatrix& other): Matrix(other) {}
 
-SquareMatrix::SquareMatrix(SquareMatrix&& other): Matrix(std::move(other)) {}
+SquareMatrix::SquareMatrix(SquareMatrix&& other): Matrix(move(other)) {}
 
 SquareMatrix::SquareMatrix(const Matrix& other): Matrix(other) {
     if (getRows() != getCols()) {
@@ -12,7 +16,7 @@ SquareMatrix::SquareMatrix(const Matrix& other): Matrix(other) {
     }
 }
 
-SquareMatrix::SquareMatrix(Matrix&& other): Matrix(std::move(other)) {
+SquareMatrix::SquareMatrix(Matrix&& other): Matrix(move(other)) {
     if (getRows() != getCols()) {
         throw MatrixException("Matrix is not square.");
     }
@@ -40,6 +44,116 @@ double SquareMatrix::determinantRecursive() {
     }
 
     return (r & 1 ? -data[r][0]: data[r][0]) * operator()(r, 0).determinantRecursive();
+}
+
+SquareMatrix SquareMatrix::transpose() const {
+    return SquareMatrix(Matrix::transpose());
+}
+
+SquareMatrix SquareMatrix::ref() const {
+    SquareMatrix result(*this);
+    int r = 0, c = 0;
+    double pivot;
+
+    while (c < getCols()) {
+        while (r < getRows() && !result[r][c]) {
+            ++r;
+        }
+        if (r == getRows()) {
+            r = c++;
+            continue;
+        }
+
+        swap(result[r], result[c]);
+        for (int i = c + 1; i < getRows(); ++i) {
+            if (result[i][c]) {
+                result.addMultipleRow(i, c, -result[i][c] / result[c][c], c + 1);
+                result[i][c] = 0;
+            }
+        }
+        r = ++c;
+    }
+    
+    return result;
+}
+
+SquareMatrix SquareMatrix::rref() const {
+    SquareMatrix result(*this);
+    int r = 0, c = 0;
+
+    while (c < getCols()) {
+        while (r < getRows() && !result[r][c]) {
+            ++r;
+        }
+        if (r == getRows()) {
+            r = c++;
+            continue;
+        }
+
+        swap(result[r], result[c]);
+        result.divideRow(c, result[c][c], c);
+        for (int i = 0; i < getRows(); ++i) {
+            if (result[i][c] && i != c) {
+                result.addMultipleRow(i, c, -result[i][c]);
+            }
+        }
+        r = ++c;
+    }
+
+    return result;
+}
+
+SquareMatrix& SquareMatrix::operator=(const SquareMatrix& other) {
+    Matrix::operator=(other);
+    return *this;
+}
+
+SquareMatrix SquareMatrix::operator+(const Matrix& other) const {
+    return SquareMatrix(Matrix::operator+(other));
+}
+
+SquareMatrix SquareMatrix::operator-(const Matrix& other) const {
+    return SquareMatrix(Matrix::operator-(other));
+}
+
+SquareMatrix SquareMatrix::operator-() const {
+    return SquareMatrix(Matrix::operator-());
+}
+
+SquareMatrix SquareMatrix::operator*(const SquareMatrix& other) const {
+    return SquareMatrix(Matrix::operator*(other));
+}
+
+Matrix SquareMatrix::operator*(const Matrix& other) const {
+    return Matrix::operator*(other);
+}
+
+SquareMatrix SquareMatrix::operator*(double scalar) const {
+    return SquareMatrix(Matrix::operator*(scalar));
+}
+
+SquareMatrix SquareMatrix::operator/(double scalar) const {
+    return SquareMatrix(Matrix::operator/(scalar));
+}
+
+SquareMatrix& SquareMatrix::operator+=(const Matrix& other) {
+    return operator=(operator+(other));
+}
+
+SquareMatrix& SquareMatrix::operator-=(const Matrix& other) {
+    return operator=(operator-(other));
+}
+
+SquareMatrix& SquareMatrix::operator*=(const Matrix& other) {
+    return operator=(operator*(other));
+}
+
+SquareMatrix& SquareMatrix::operator*=(double scalar) {
+    return operator=(operator*(scalar));
+}
+
+SquareMatrix& SquareMatrix::operator/=(double scalar) {
+    return operator=(operator/(scalar));
 }
 
 SquareMatrix SquareMatrix::id(int size) {
@@ -146,8 +260,8 @@ SquareMatrix SquareMatrix::inverse() const {
             throw MatrixException("Matrix is singular.");
         }
 
-        std::swap(result.data[r], result.data[c]);
-        std::swap(copy.data[r], copy.data[c]);
+        swap(result[r], result[c]);
+        swap(copy[r], copy[c]);
         result.divideRow(c, copy[c][c]);
         copy.divideRow(c, copy[c][c]);
 
@@ -163,25 +277,14 @@ SquareMatrix SquareMatrix::inverse() const {
     return result;
 }
 
-SquareMatrix& SquareMatrix::operator=(const SquareMatrix& other) {
-    Matrix::operator=(other);
-    return *this;
-}
-
 SquareMatrix operator*(double scalar, const SquareMatrix& matrix) {
     return SquareMatrix(matrix * scalar);
 }
 
-std::ostream& operator<<(std::ostream& os, const SquareMatrix& matrix) {
-    return os << Matrix(matrix);
+ostream& operator<<(ostream& os, const SquareMatrix& matrix) {
+    return os << static_cast<Matrix>(matrix);
 }
 
-std::istream& operator>>(std::istream& is, SquareMatrix& matrix) {
-    for (double*& row: matrix.data) {
-        for (int i = 0; i < matrix.getCols(); ++i) {
-            is >> row[i];
-        }
-    }
-
-    return is;
+istream& operator>>(istream& is, SquareMatrix& matrix) {
+    return is >> static_cast<Matrix&>(matrix);
 }
