@@ -12,14 +12,14 @@ using std::endl;
 MatrixException::MatrixException(const string& message): runtime_error(message) {}
 
 template <typename T>
-Matrix<T>::Matrix(int rows, int cols, const T& zero): ROWS(rows), COLS(cols), ZERO(zero), data(ROWS, nullptr) {
+Matrix<T>::Matrix(unsigned long rows, unsigned long cols, const T& zero): ROWS(rows), COLS(cols), ZERO(zero), data(ROWS, nullptr) {
     if (ROWS < 1 || COLS < 1) {
         throw MatrixException("Matrix dimensions must be greater than 0.");
     }
     
     for (T*& row: data) {
         row = new T[COLS];
-        for (int i = 0; i < COLS; ++i) {
+        for (unsigned long i = 0; i < COLS; ++i) {
             row[i] = ZERO;
         }
     }
@@ -35,8 +35,8 @@ Matrix<T>::Matrix(Matrix<T>&& other): ROWS(other.ROWS), COLS(other.COLS), ZERO(o
 }
 
 template <typename T>
-Matrix<T>::Matrix(const T* const* values, int rows, int cols, const T& zero): Matrix(rows, cols, zero) {
-    for (int i = 0; i < ROWS; ++i) {
+Matrix<T>::Matrix(const T* const* values, unsigned long rows, unsigned long cols, const T& zero): Matrix(rows, cols, zero) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
         setRow(i, values[i]);
     }
 }
@@ -54,7 +54,7 @@ size_t Matrix<T>::maxLength() const {
     size_t maxl = 0;
     stringstream ss;
     for (const T* row: data) {
-        for (int i = 0; i < COLS; ++i) {
+        for (unsigned long i = 0; i < COLS; ++i) {
             ss.str("");
             ss << row[i];
             maxl = max(maxl, ss.str().length());
@@ -65,49 +65,49 @@ size_t Matrix<T>::maxLength() const {
 }
 
 template <typename T>
-void Matrix<T>::setRow(int row, const T* values) {
+void Matrix<T>::setRow(unsigned long row, const T* values) {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
     
-    for (int i = 0; i < COLS; ++i) {
+    for (unsigned long i = 0; i < COLS; ++i) {
         data[row][i] = values[i];
     }
 }
 
 template <typename T>
-void Matrix<T>::multiplyRow(int row, T scalar, int startCol) {
-    for (int i = startCol; i < COLS; ++i) {
+void Matrix<T>::multiplyRow(unsigned long row, T scalar, unsigned long startCol) {
+    for (unsigned long i = startCol; i < COLS; ++i) {
         data[row][i] *= scalar;
     }
 }
 
 template <typename T>
-void Matrix<T>::divideRow(int row, T scalar, int startCol) {
-    for (int i = startCol; i < COLS; ++i) {
+void Matrix<T>::divideRow(unsigned long row, T scalar, unsigned long startCol) {
+    for (unsigned long i = startCol; i < COLS; ++i) {
         data[row][i] /= scalar;
     }
 }
 
 template <typename T>
-void Matrix<T>::addMultipleRow(int targetRow, int sourceRow, T scalar, int startCol) {
-    for (int i = startCol; i < COLS; ++i) {
+void Matrix<T>::addMultipleRow(unsigned long targetRow, unsigned long sourceRow, T scalar, unsigned long startCol) {
+    for (unsigned long i = startCol; i < COLS; ++i) {
         data[targetRow][i] += data[sourceRow][i] * scalar;
     }
 }
 
 template <typename T>
-int Matrix<T>::getRows() const {
+unsigned long Matrix<T>::getRows() const {
     return ROWS;
 }
 
 template <typename T>
-int Matrix<T>::getCols() const {
+unsigned long Matrix<T>::getCols() const {
     return COLS;
 }
 
 template <typename T>
-void Matrix<T>::setRow(int row, const vector<T>& values) {
+void Matrix<T>::setRow(unsigned long row, const vector<T>& values) {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
@@ -116,13 +116,13 @@ void Matrix<T>::setRow(int row, const vector<T>& values) {
         throw MatrixException("The vector size must be equal to the number columns.");
     }
     
-    for (int i = 0; i < COLS; ++i) {
+    for (unsigned long i = 0; i < COLS; ++i) {
         data[row][i] = values[i];
     }
 }
 
 template <typename T>
-void Matrix<T>::setCol(int col, const vector<T>& values) {
+void Matrix<T>::setCol(unsigned long col, const vector<T>& values) {
     if (col < 0 || col >= COLS) {
         throw MatrixException("Column index out of bounds.");
     }
@@ -131,13 +131,13 @@ void Matrix<T>::setCol(int col, const vector<T>& values) {
         throw MatrixException("The vector size must be equal to the number rows.");
     }
 
-    for (int i = 0; i < ROWS; ++i) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
         data[i][col] = values[i];
     }
 }
 
 template <typename T>
-vector<T> Matrix<T>::getRow(int row) const {
+vector<T> Matrix<T>::getRow(unsigned long row) const {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
@@ -146,13 +146,13 @@ vector<T> Matrix<T>::getRow(int row) const {
 }
 
 template <typename T>
-vector<T> Matrix<T>::getCol(int col) const {
+vector<T> Matrix<T>::getCol(unsigned long col) const {
     if (col < 0 || col >= COLS) {
         throw MatrixException("Column index out of bounds.");
     }
     
     vector<T> result(ROWS);
-    for (int i = 0; i < ROWS; ++i) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
         result[i] = data[i][col];
     }
     
@@ -160,12 +160,12 @@ vector<T> Matrix<T>::getCol(int col) const {
 }
 
 template <typename T>
-bool Matrix<T>::isZeroRow(int row) const {
+bool Matrix<T>::isZeroRow(unsigned long row) const {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
     
-    for (int i = 0; i < COLS; ++i) {
+    for (unsigned long i = 0; i < COLS; ++i) {
         if (data[row][i] != ZERO) {
             return false;
         }
@@ -175,7 +175,7 @@ bool Matrix<T>::isZeroRow(int row) const {
 }
 
 template <typename T>
-bool Matrix<T>::isZeroCol(int col) const {
+bool Matrix<T>::isZeroCol(unsigned long col) const {
     if (col < 0 || col >= COLS) {
         throw MatrixException("Column index out of bounds.");
     }
@@ -190,9 +190,9 @@ bool Matrix<T>::isZeroCol(int col) const {
 }
 
 template <typename T>
-int Matrix<T>::rank() const {
+unsigned long Matrix<T>::rank() const {
     Matrix<T> refMatrix(ref());
-    int rank = 0;
+    unsigned long rank = 0;
 
     while (rank < ROWS && !refMatrix.isZeroRow(rank)) {
         ++rank;
@@ -204,8 +204,8 @@ int Matrix<T>::rank() const {
 template <typename T>
 Matrix<T> Matrix<T>::transpose() const {
     Matrix<T> result(COLS, ROWS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
+        for (unsigned long j = 0; j < COLS; ++j) {
             result[j][i] = data[i][j];
         }
     }
@@ -216,8 +216,7 @@ Matrix<T> Matrix<T>::transpose() const {
 template <typename T>
 Matrix<T> Matrix<T>::ref() const {
     Matrix<T> result(*this);
-    int r = 0, r0 = 0, c = 0;
-    T pivot;
+    unsigned long r = 0, r0 = 0, c = 0;
 
     while (r0 < ROWS && c < COLS) {
         while (r < ROWS && result[r][c] == ZERO) {
@@ -230,7 +229,7 @@ Matrix<T> Matrix<T>::ref() const {
         }
 
         swap(result[r], result[r0]);
-        for (int i = r0 + 1; i < ROWS; ++i) {
+        for (unsigned long i = r0 + 1; i < ROWS; ++i) {
             if (result[i][c] != ZERO) {
                 result.addMultipleRow(i, r0, -result[i][c] / result[r0][c], c + 1);
                 result[i][c] = ZERO;
@@ -246,7 +245,7 @@ Matrix<T> Matrix<T>::ref() const {
 template <typename T>
 Matrix<T> Matrix<T>::rref() const {
     Matrix<T> result(*this);
-    int r = 0, r0 = 0, c = 0;
+    unsigned long r = 0, r0 = 0, c = 0;
 
     while (r0 < ROWS && c < COLS) {
         while (r < ROWS && result[r][c] == ZERO) {
@@ -260,7 +259,7 @@ Matrix<T> Matrix<T>::rref() const {
 
         swap(result[r], result[r0]);
         result.divideRow(r0, result[r0][c], c);
-        for (int i = 0; i < ROWS; ++i) {
+        for (unsigned long i = 0; i < ROWS; ++i) {
             if (result[i][c] != ZERO && i != r0) {
                 result.addMultipleRow(i, r0, -result[i][c]);
             }
@@ -282,7 +281,7 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& other) {
         throw MatrixException("Matrix dimensions must match for assignment.");
     }
 
-    for (int i = 0; i < ROWS; ++i) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
         setRow(i, other[i]);
     }
     
@@ -296,8 +295,8 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T>& other) const {
     }
 
     Matrix<T> result(ROWS, COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
+        for (unsigned long j = 0; j < COLS; ++j) {
             result[i][j] = data[i][j] + other[i][j];
         }
     }
@@ -312,8 +311,8 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const {
     }
 
     Matrix<T> result(ROWS, COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
+        for (unsigned long j = 0; j < COLS; ++j) {
             result[i][j] = data[i][j] - other[i][j];
         }
     }
@@ -324,8 +323,8 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const {
 template <typename T>
 Matrix<T> Matrix<T>::operator-() const {
     Matrix<T> result(ROWS, COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
+        for (unsigned long j = 0; j < COLS; ++j) {
             result[i][j] = -data[i][j];
         }
     }
@@ -340,10 +339,10 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T>& other) const {
     }
 
     Matrix<T> result(ROWS, other.COLS);
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < other.COLS; ++j) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
+        for (unsigned long j = 0; j < other.COLS; ++j) {
             result[i][j] = ZERO;
-            for (int k = 0; k < COLS; ++k) {
+            for (unsigned long k = 0; k < COLS; ++k) {
                 result[i][j] += data[i][k] * other[k][j];
             }
         }
@@ -355,7 +354,7 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T>& other) const {
 template <typename T>
 Matrix<T> Matrix<T>::operator*(T scalar) const {
     Matrix<T> result(*this);
-    for (int i = 0; i < ROWS; ++i) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
         result.multiplyRow(i, scalar);
     }
     
@@ -365,7 +364,7 @@ Matrix<T> Matrix<T>::operator*(T scalar) const {
 template <typename T>
 Matrix<T> Matrix<T>::operator/(T scalar) const {
     Matrix<T> result(*this);
-    for (int i = 0; i < ROWS; ++i) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
         result.divideRow(i, scalar);
     }
     
@@ -403,8 +402,8 @@ bool Matrix<T>::operator==(const Matrix<T>& other) const {
         return false;
     }
 
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
+        for (unsigned long j = 0; j < COLS; ++j) {
             if (data[i][j] != other[i][j]) {
                 return false;
             }
@@ -425,7 +424,7 @@ bool Matrix<T>::operator!() const {
 }
 
 template <typename T>
-T*& Matrix<T>::operator[](int row) {
+T*& Matrix<T>::operator[](unsigned long row) {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
@@ -434,7 +433,7 @@ T*& Matrix<T>::operator[](int row) {
 }
 
 template <typename T>
-const T* Matrix<T>::operator[](int row) const {
+const T* Matrix<T>::operator[](unsigned long row) const {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
@@ -444,7 +443,7 @@ const T* Matrix<T>::operator[](int row) const {
 
 template <typename T>
 Matrix<T>::operator bool() const {
-    for (int i = 0; i < ROWS; ++i) {
+    for (unsigned long i = 0; i < ROWS; ++i) {
         if (!isZeroRow(i)) {
             return true;
         }
@@ -460,9 +459,9 @@ Matrix<T> operator*(T scalar, const Matrix<T>& matrix) {
 
 template <typename T>
 ostream& operator<<(ostream& os, const Matrix<T>& matrix) {
-    int maxl = 1 + matrix.maxLength();
+    unsigned long maxl = 1 + matrix.maxLength();
     for (const T* row: matrix.data) {
-        for (int i = 0; i < matrix.COLS; ++i) {
+        for (unsigned long i = 0; i < matrix.COLS; ++i) {
             os << setw(maxl) << row[i];
         }
         os << endl;
@@ -474,7 +473,7 @@ ostream& operator<<(ostream& os, const Matrix<T>& matrix) {
 template <typename T>
 istream& operator>>(istream& is, Matrix<T>& matrix) {
     for (T* row: matrix.data) {
-        for (int i = 0; i < matrix.COLS; ++i) {
+        for (unsigned long i = 0; i < matrix.COLS; ++i) {
             is >> row[i];
         }
     }

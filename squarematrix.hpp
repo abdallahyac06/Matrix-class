@@ -9,12 +9,12 @@ class SquareMatrix : public Matrix<T> {
         T determinantRecursive();
 
     public:
-        SquareMatrix(int size = 1, const T& zero = T());
+        SquareMatrix(unsigned long size = 1, const T& zero = T());
         SquareMatrix(const SquareMatrix<T>& other);
         SquareMatrix(SquareMatrix<T>&& other);
         SquareMatrix(const Matrix<T>& other);
         SquareMatrix(Matrix<T>&& other);
-        SquareMatrix(const T* const* values, int size, const T& zero = T());
+        SquareMatrix(const T* const* values, unsigned long size, const T& zero = T());
         virtual ~SquareMatrix() = default;
 
         SquareMatrix<T> transpose() const;
@@ -34,14 +34,14 @@ class SquareMatrix : public Matrix<T> {
         SquareMatrix<T>& operator*=(T scalar);
         SquareMatrix<T>& operator/=(T scalar);
 
-        static const SquareMatrix<T> id(int size, T scalar = T(1));
+        static const SquareMatrix<T> id(unsigned long size, T scalar = T(1));
         T trace() const;
         T determinant() const;
         bool isLTriangular() const;
         bool isUTriangular() const;
         bool isDiagonal() const;
         bool isSymmetric() const;
-        SquareMatrix<T> operator()(int row, int col) const;
+        SquareMatrix<T> operator()(unsigned long row, unsigned long col) const;
         SquareMatrix<T> adjoint() const;
         SquareMatrix<T> inverse() const;
 };

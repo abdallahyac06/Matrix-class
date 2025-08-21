@@ -1,7 +1,7 @@
 #include "squarematrix.hpp"
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(int size, const T& zero) : Matrix<T>(size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(unsigned long size, const T& zero) : Matrix<T>(size, size, zero) {}
 
 template <typename T>
 SquareMatrix<T>::SquareMatrix(const SquareMatrix<T>& other) : Matrix<T>(other) {}
@@ -24,7 +24,7 @@ SquareMatrix<T>::SquareMatrix(Matrix<T>&& other) : Matrix<T>(move(other)) {
 }
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const T* const* values, int size, const T& zero) : Matrix<T>(values, size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(const T* const* values, unsigned long size, const T& zero) : Matrix<T>(values, size, size, zero) {}
 
 template <typename T>
 T SquareMatrix<T>::determinantRecursive() {
@@ -32,7 +32,7 @@ T SquareMatrix<T>::determinantRecursive() {
         return this->data[0][0];
     }
 
-    int r = 0;
+    unsigned long r = 0;
     while (r < this->getRows() && this->data[r][0] == this->ZERO) {
         ++r;
     }
@@ -40,7 +40,7 @@ T SquareMatrix<T>::determinantRecursive() {
         return this->ZERO;
     }
 
-    for (int i = 0; i < this->getRows(); ++i) {
+    for (unsigned long i = 0; i < this->getRows(); ++i) {
         if (i != r && this->data[i][0] != this->ZERO) {
             this->addMultipleRow(i, r, -this->data[i][0] / this->data[r][0]);
         }
@@ -57,8 +57,7 @@ SquareMatrix<T> SquareMatrix<T>::transpose() const {
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::ref() const {
     SquareMatrix<T> result(*this);
-    int r = 0, c = 0;
-    T pivot;
+    unsigned long r = 0, c = 0;
 
     while (c < this->getCols()) {
         while (r < this->getRows() && result[r][c] == this->ZERO) {
@@ -70,7 +69,7 @@ SquareMatrix<T> SquareMatrix<T>::ref() const {
         }
 
         swap(result[r], result[c]);
-        for (int i = c + 1; i < this->getRows(); ++i) {
+        for (unsigned long i = c + 1; i < this->getRows(); ++i) {
             if (result[i][c] != this->ZERO) {
                 result.addMultipleRow(i, c, -result[i][c] / result[c][c], c + 1);
                 result[i][c] = this->ZERO;
@@ -85,7 +84,7 @@ SquareMatrix<T> SquareMatrix<T>::ref() const {
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::rref() const {
     SquareMatrix<T> result(*this);
-    int r = 0, c = 0;
+    unsigned long r = 0, c = 0;
 
     while (c < this->getCols()) {
         while (r < this->getRows() && result[r][c] == this->ZERO) {
@@ -98,7 +97,7 @@ SquareMatrix<T> SquareMatrix<T>::rref() const {
 
         swap(result[r], result[c]);
         result.divideRow(c, result[c][c], c);
-        for (int i = 0; i < this->getRows(); ++i) {
+        for (unsigned long i = 0; i < this->getRows(); ++i) {
             if (result[i][c] != this->ZERO && i != c) {
                 result.addMultipleRow(i, c, -result[i][c]);
             }
@@ -176,9 +175,9 @@ SquareMatrix<T>& SquareMatrix<T>::operator/=(T scalar) {
 }
 
 template <typename T>
-const SquareMatrix<T> SquareMatrix<T>::id(int size, T scalar) {
+const SquareMatrix<T> SquareMatrix<T>::id(unsigned long size, T scalar) {
     SquareMatrix<T> result(size);
-    for (int i = 0; i < size; ++i) {
+    for (unsigned long i = 0; i < size; ++i) {
         result[i][i] = scalar;
     }
 
@@ -188,7 +187,7 @@ const SquareMatrix<T> SquareMatrix<T>::id(int size, T scalar) {
 template <typename T>
 T SquareMatrix<T>::trace() const {
     T result = this->ZERO;
-    for (int i = 0; i < this->getRows(); ++i) {
+    for (unsigned long i = 0; i < this->getRows(); ++i) {
         result += this->data[i][i];
     }
 
@@ -202,8 +201,8 @@ T SquareMatrix<T>::determinant() const {
 
 template <typename T>
 bool SquareMatrix<T>::isLTriangular() const {
-    for (int i = 0; i < this->getRows() - 1; ++i) {
-        for (int j = i + 1; j < this->getCols(); ++j) {
+    for (unsigned long i = 0; i < this->getRows() - 1; ++i) {
+        for (unsigned long j = i + 1; j < this->getCols(); ++j) {
             if (this->data[i][j] != this->ZERO) {
                 return false;
             }
@@ -215,8 +214,8 @@ bool SquareMatrix<T>::isLTriangular() const {
 
 template <typename T>
 bool SquareMatrix<T>::isUTriangular() const {
-    for (int i = 1; i < this->getRows(); ++i) {
-        for (int j = 0; j < i; ++j) {
+    for (unsigned long i = 1; i < this->getRows(); ++i) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (this->data[i][j] != this->ZERO) {
                 return false;
             }
@@ -233,8 +232,8 @@ bool SquareMatrix<T>::isDiagonal() const {
 
 template <typename T>
 bool SquareMatrix<T>::isSymmetric() const {
-    for (int i = 1; i < this->getRows(); ++i) {
-        for (int j = 0; j < i; ++j) {
+    for (unsigned long i = 1; i < this->getRows(); ++i) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (this->data[i][j] != this->data[j][i]) {
                 return false;
             }
@@ -245,7 +244,7 @@ bool SquareMatrix<T>::isSymmetric() const {
 }
 
 template <typename T>
-SquareMatrix<T> SquareMatrix<T>::operator()(int row, int col) const {
+SquareMatrix<T> SquareMatrix<T>::operator()(unsigned long row, unsigned long col) const {
     if (row < 0 || row >= this->getRows()) {
         throw MatrixException("Row index out of bounds.");
     }
@@ -255,8 +254,8 @@ SquareMatrix<T> SquareMatrix<T>::operator()(int row, int col) const {
     }
     
     SquareMatrix<T> result(this->getRows() - 1);
-    for (int i = 0; i < this->getRows() - 1; ++i) {
-        for (int j = 0; j < this->getCols() - 1; ++j) {
+    for (unsigned long i = 0; i < this->getRows() - 1; ++i) {
+        for (unsigned long j = 0; j < this->getCols() - 1; ++j) {
             result[i][j] = this->data[i + (i >= row)][j + (j >= col)];
         }
     }
@@ -267,8 +266,8 @@ SquareMatrix<T> SquareMatrix<T>::operator()(int row, int col) const {
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::adjoint() const {
     SquareMatrix<T> result(this->getRows());
-    for (int i = 0; i < this->getRows(); ++i) {
-        for (int j = 0; j < this->getCols(); ++j) {
+    for (unsigned long i = 0; i < this->getRows(); ++i) {
+        for (unsigned long j = 0; j < this->getCols(); ++j) {
             result[j][i] = operator()(i, j).determinantRecursive();
             if ((i ^ j) & 1) {
                 result[j][i] = -result[j][i];
@@ -282,7 +281,7 @@ SquareMatrix<T> SquareMatrix<T>::adjoint() const {
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::inverse() const {
     SquareMatrix<T> copy(*this), result(id(this->getRows()));
-    int r = 0, c = 0;
+    unsigned long r = 0, c = 0;
 
     while (c < this->getCols()) {
         while (r < this->getRows() && copy[r][c] == this->ZERO) {
@@ -297,7 +296,7 @@ SquareMatrix<T> SquareMatrix<T>::inverse() const {
         result.divideRow(c, copy[c][c]);
         copy.divideRow(c, copy[c][c]);
 
-        for (int i = 0; i < this->getRows(); ++i) {
+        for (unsigned long i = 0; i < this->getRows(); ++i) {
             if (copy[i][c] != this->ZERO && i != c) {
                 result.addMultipleRow(i, c, -copy[i][c]);
                 copy.addMultipleRow(i, c, -copy[i][c]);

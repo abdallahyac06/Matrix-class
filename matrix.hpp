@@ -14,34 +14,34 @@ using std::string;
 template <typename T>
 class Matrix {
     private:
-        const int ROWS;
-        const int COLS;
+        const unsigned long ROWS;
+        const unsigned long COLS;
         
     protected:
         const T ZERO;
         vector<T*> data;
         size_t maxLength() const;
-        void setRow(int row, const T* values);
-        void multiplyRow(int row, T scalar, int startCol = 0);
-        void divideRow(int row, T scalar, int startCol = 0);
-        void addMultipleRow(int targetRow, int sourceRow, T scalar, int startCol = 0);
+        void setRow(unsigned long row, const T* values);
+        void multiplyRow(unsigned long row, T scalar, unsigned long startCol = 0);
+        void divideRow(unsigned long row, T scalar, unsigned long startCol = 0);
+        void addMultipleRow(unsigned long targetRow, unsigned long sourceRow, T scalar, unsigned long startCol = 0);
 
     public:
-        Matrix(int rows = 1, int cols = 1, const T& zero = T());
+        Matrix(unsigned long rows = 1, unsigned long cols = 1, const T& zero = T());
         Matrix(const Matrix<T>& other);
         Matrix(Matrix<T>&& other);
-        Matrix(const T* const* values, int rows = 1, int cols = 1, const T& zero = T());
+        Matrix(const T* const* values, unsigned long rows = 1, unsigned long cols = 1, const T& zero = T());
         ~Matrix();
 
-        int getRows() const;
-        int getCols() const;
-        void setRow(int row, const vector<T>& values);
-        void setCol(int col, const vector<T>& values);
-        vector<T> getRow(int row) const;
-        vector<T> getCol(int col) const;
-        bool isZeroRow(int row) const;
-        bool isZeroCol(int col) const;
-        int rank() const;
+        unsigned long getRows() const;
+        unsigned long getCols() const;
+        void setRow(unsigned long row, const vector<T>& values);
+        void setCol(unsigned long col, const vector<T>& values);
+        vector<T> getRow(unsigned long row) const;
+        vector<T> getCol(unsigned long col) const;
+        bool isZeroRow(unsigned long row) const;
+        bool isZeroCol(unsigned long col) const;
+        unsigned long rank() const;
         Matrix<T> transpose() const;
         Matrix<T> ref() const;
         Matrix<T> rref() const;
@@ -62,8 +62,8 @@ class Matrix {
         bool operator==(const Matrix<T>& other) const;
         bool operator!=(const Matrix<T>& other) const;
         bool operator!() const;
-        T*& operator[](int row);
-        const T* operator[](int row) const;
+        T*& operator[](unsigned long row);
+        const T* operator[](unsigned long row) const;
         operator bool() const;
     
     template <typename U>
