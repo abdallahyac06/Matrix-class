@@ -4,7 +4,7 @@ using std::move;
 using std::swap;
 
 
-SquareMatrix::SquareMatrix(int size): Matrix(size, size) {}
+SquareMatrix::SquareMatrix(unsigned long size): Matrix(size, size) {}
 
 SquareMatrix::SquareMatrix(const SquareMatrix& other): Matrix(other) {}
 
@@ -22,14 +22,14 @@ SquareMatrix::SquareMatrix(Matrix&& other): Matrix(move(other)) {
     }
 }
 
-SquareMatrix::SquareMatrix(const double* const* values, int size): Matrix(values, size, size) {}
+SquareMatrix::SquareMatrix(const double* const* values, unsigned long size): Matrix(values, size, size) {}
 
 double SquareMatrix::determinantRecursive() {
     if (getRows() == 1) {
         return data[0][0];
     }
 
-    int r = 0;
+    unsigned long r = 0;
     while (r < getRows() && !data[r][0]) {
         ++r;
     }
@@ -37,7 +37,7 @@ double SquareMatrix::determinantRecursive() {
         return 0.0;
     }
 
-    for (int i = 0; i < getRows(); ++i) {
+    for (unsigned long i = 0; i < getRows(); ++i) {
         if (i != r && data[i][0]) {
             addMultipleRow(i, r, -data[i][0] / data[r][0]);
         }
@@ -52,8 +52,7 @@ SquareMatrix SquareMatrix::transpose() const {
 
 SquareMatrix SquareMatrix::ref() const {
     SquareMatrix result(*this);
-    int r = 0, c = 0;
-    double pivot;
+    unsigned long r = 0, c = 0;
 
     while (c < getCols()) {
         while (r < getRows() && !result[r][c]) {
@@ -65,7 +64,7 @@ SquareMatrix SquareMatrix::ref() const {
         }
 
         swap(result[r], result[c]);
-        for (int i = c + 1; i < getRows(); ++i) {
+        for (unsigned long i = c + 1; i < getRows(); ++i) {
             if (result[i][c]) {
                 result.addMultipleRow(i, c, -result[i][c] / result[c][c], c + 1);
                 result[i][c] = 0;
@@ -79,7 +78,7 @@ SquareMatrix SquareMatrix::ref() const {
 
 SquareMatrix SquareMatrix::rref() const {
     SquareMatrix result(*this);
-    int r = 0, c = 0;
+    unsigned long r = 0, c = 0;
 
     while (c < getCols()) {
         while (r < getRows() && !result[r][c]) {
@@ -92,7 +91,7 @@ SquareMatrix SquareMatrix::rref() const {
 
         swap(result[r], result[c]);
         result.divideRow(c, result[c][c], c);
-        for (int i = 0; i < getRows(); ++i) {
+        for (unsigned long i = 0; i < getRows(); ++i) {
             if (result[i][c] && i != c) {
                 result.addMultipleRow(i, c, -result[i][c]);
             }
@@ -156,9 +155,9 @@ SquareMatrix& SquareMatrix::operator/=(double scalar) {
     return operator=(operator/(scalar));
 }
 
-SquareMatrix SquareMatrix::id(int size) {
+SquareMatrix SquareMatrix::id(unsigned long size) {
     SquareMatrix result(size);
-    for (int i = 0; i < size; ++i) {
+    for (unsigned long i = 0; i < size; ++i) {
         result[i][i] = 1.0;
     }
 
@@ -167,7 +166,7 @@ SquareMatrix SquareMatrix::id(int size) {
 
 double SquareMatrix::trace() const {
     double result = 0;
-    for (int i = 0; i < getRows(); ++i) {
+    for (unsigned long i = 0; i < getRows(); ++i) {
         result += data[i][i];
     }
 
@@ -179,8 +178,8 @@ double SquareMatrix::determinant() const {
 }
 
 bool SquareMatrix::isLowerTriangular() const {
-    for (int i = 0; i < getRows() - 1; ++i) {
-        for (int j = i + 1; j < getCols(); ++j) {
+    for (unsigned long i = 0; i < getRows() - 1; ++i) {
+        for (unsigned long j = i + 1; j < getCols(); ++j) {
             if (data[i][j]) {
                 return false;
             }
@@ -191,8 +190,8 @@ bool SquareMatrix::isLowerTriangular() const {
 }
 
 bool SquareMatrix::isUpperTriangular() const {
-    for (int i = 1; i < getRows(); ++i) {
-        for (int j = 0; j < i; ++j) {
+    for (unsigned long i = 1; i < getRows(); ++i) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (data[i][j]) {
                 return false;
             }
@@ -207,8 +206,8 @@ bool SquareMatrix::isDiagonal() const {
 }
 
 bool SquareMatrix::isSymmetric() const {
-    for (int i = 1; i < getRows(); ++i) {
-        for (int j = 0; j < i; ++j) {
+    for (unsigned long i = 1; i < getRows(); ++i) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (data[i][j] != data[j][i]) {
                 return false;
             }
@@ -218,7 +217,7 @@ bool SquareMatrix::isSymmetric() const {
     return true;
 }
 
-SquareMatrix SquareMatrix::operator()(int row, int col) const {
+SquareMatrix SquareMatrix::operator()(unsigned long row, unsigned long col) const {
     if (row < 0 || row >= getRows()) {
         throw MatrixException("Row index out of bounds.");
     }
@@ -228,8 +227,8 @@ SquareMatrix SquareMatrix::operator()(int row, int col) const {
     }
 
     SquareMatrix result(getRows() - 1);
-    for (int i = 0; i < getRows() - 1; ++i) {
-        for (int j = 0; j < getCols() - 1; ++j) {
+    for (unsigned long i = 0; i < getRows() - 1; ++i) {
+        for (unsigned long j = 0; j < getCols() - 1; ++j) {
             result[i][j] = data[i + (i >= row)][j + (j >= col)];
         }
     }
@@ -239,8 +238,8 @@ SquareMatrix SquareMatrix::operator()(int row, int col) const {
 
 SquareMatrix SquareMatrix::adjoint() const {
     SquareMatrix result(getRows());
-    for (int i = 0; i < getRows(); ++i) {
-        for (int j = 0; j < getCols(); ++j) {
+    for (unsigned long i = 0; i < getRows(); ++i) {
+        for (unsigned long j = 0; j < getCols(); ++j) {
             result[j][i] = ((i ^ j) & 1 ? -1.0 : 1.0) * operator()(i, j).determinant();
         }
     }
@@ -250,7 +249,7 @@ SquareMatrix SquareMatrix::adjoint() const {
 
 SquareMatrix SquareMatrix::inverse() const {
     SquareMatrix copy(*this), result(id(getRows()));
-    int r = 0, c = 0;
+    unsigned long r = 0, c = 0;
 
     while (c < getCols()) {
         while (r < getRows() && !copy[r][c]) {
@@ -265,7 +264,7 @@ SquareMatrix SquareMatrix::inverse() const {
         result.divideRow(c, copy[c][c]);
         copy.divideRow(c, copy[c][c]);
 
-        for (int i = 0; i < getRows(); ++i) {
+        for (unsigned long i = 0; i < getRows(); ++i) {
             if (copy[i][c] && i != c) {
                 result.addMultipleRow(i, c, -copy[i][c]);
                 copy.addMultipleRow(i, c, -copy[i][c]);

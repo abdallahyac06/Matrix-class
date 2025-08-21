@@ -8,12 +8,12 @@ class SquareMatrix : public Matrix {
         double determinantRecursive();
         
     public:
-        SquareMatrix(int size = 1);
+        SquareMatrix(unsigned long size = 1);
         SquareMatrix(const SquareMatrix& other);
         SquareMatrix(SquareMatrix&& other);
         SquareMatrix(const Matrix& other);
         SquareMatrix(Matrix&& other);
-        SquareMatrix(const double* const* values, int size = 1);
+        SquareMatrix(const double* const* values, unsigned long size = 1);
         virtual ~SquareMatrix() = default;
 
         SquareMatrix transpose() const;
@@ -33,14 +33,14 @@ class SquareMatrix : public Matrix {
         SquareMatrix& operator*=(double scalar);
         SquareMatrix& operator/=(double scalar);
 
-        static SquareMatrix id(int size);
+        static SquareMatrix id(unsigned long size);
         double trace() const;
         double determinant() const;
         bool isLowerTriangular() const;
         bool isUpperTriangular() const;
         bool isDiagonal() const;
         bool isSymmetric() const;
-        SquareMatrix operator()(int row, int col) const;
+        SquareMatrix operator()(unsigned long row, unsigned long col) const;
         SquareMatrix adjoint() const;
         SquareMatrix inverse() const;
 };

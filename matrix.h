@@ -13,33 +13,33 @@ using std::string;
 
 class Matrix {
     private:
-        const int ROWS;
-        const int COLS;
+        const unsigned long ROWS;
+        const unsigned long COLS;
         
     protected:
         vector<double*> data;
         size_t maxLength() const;
-        void setRow(int row, const double* values);
-        void multiplyRow(int row, double scalar, int startCol = 0);
-        void divideRow(int row, double scalar, int startCol = 0);
-        void addMultipleRow(int targetRow, int sourceRow, double scalar, int startCol = 0);
+        void setRow(unsigned long row, const double* values);
+        void multiplyRow(unsigned long row, double scalar, unsigned long startCol = 0);
+        void divideRow(unsigned long row, double scalar, unsigned long startCol = 0);
+        void addMultipleRow(unsigned long targetRow, unsigned long sourceRow, double scalar, unsigned long startCol = 0);
 
     public:
-        Matrix(int rows = 1, int cols = 1);
+        Matrix(unsigned long rows = 1, unsigned long cols = 1);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other);
-        Matrix(const double* const* values, int rows = 1, int cols = 1);
+        Matrix(const double* const* values, unsigned long rows = 1, unsigned long cols = 1);
         ~Matrix();
 
-        int getRows() const;
-        int getCols() const;
-        void setRow(int row, const vector<double>& values);
-        void setCol(int col, const vector<double>& values);
-        vector<double> getRow(int row) const;
-        vector<double> getCol(int col) const;
-        bool isZeroRow(int row) const;
-        bool isZeroCol(int col) const;
-        int rank() const;
+        unsigned long getRows() const;
+        unsigned long getCols() const;
+        void setRow(unsigned long row, const vector<double>& values);
+        void setCol(unsigned long col, const vector<double>& values);
+        vector<double> getRow(unsigned long row) const;
+        vector<double> getCol(unsigned long col) const;
+        bool isZeroRow(unsigned long row) const;
+        bool isZeroCol(unsigned long col) const;
+        unsigned long rank() const;
         Matrix transpose() const;
         Matrix ref() const;
         Matrix rref() const;
@@ -59,8 +59,8 @@ class Matrix {
         bool operator==(const Matrix&other) const;
         bool operator!=(const Matrix&other) const;
         bool operator!() const;
-        double*& operator[](int row);
-        const double* operator[](int row) const;
+        double*& operator[](unsigned long row);
+        const double* operator[](unsigned long row) const;
         operator bool() const;
         
     friend Matrix operator*(double scalar, const Matrix& matrix);
