@@ -13,11 +13,9 @@ using std::string;
 
 template <typename T>
 class Matrix {
-    private:
+    protected:
         const unsigned long ROWS;
         const unsigned long COLS;
-        
-    protected:
         const T ZERO;
         vector<T*> data;
         size_t maxLength() const;

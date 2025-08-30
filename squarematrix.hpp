@@ -18,7 +18,7 @@ class SquareMatrix : public Matrix<T> {
         SquareMatrix(SquareMatrix<T>&& other);
         SquareMatrix(const Matrix<T>& other);
         SquareMatrix(Matrix<T>&& other);
-        SquareMatrix(const T* const* values, unsigned long size, const T& zero = T());
+        SquareMatrix(const T* const* values, unsigned long size = 1, const T& zero = T());
         virtual ~SquareMatrix() = default;
 
         SquareMatrix<T> transpose() const;
