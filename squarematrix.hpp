@@ -2,6 +2,10 @@
 #define SQUAREMATRIX_H
 
 #include "matrix.hpp"
+#include <iostream>
+
+using std::ostream;
+using std::istream;
 
 template <typename T>
 class SquareMatrix : public Matrix<T> {

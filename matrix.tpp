@@ -1,11 +1,19 @@
 #include "matrix.hpp"
-#include <iomanip>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
 #include <sstream>
+#include <iomanip>
+
+using std::string;
+using std::runtime_error;
+using std::stringstream;
+using std::ostream;
+using std::istream;
 
 using std::move;
-using std::stringstream;
-using std::swap;
 using std::max;
+using std::swap;
 using std::setw;
 using std::endl;
 
@@ -104,59 +112,6 @@ unsigned long Matrix<T>::getRows() const {
 template <typename T>
 unsigned long Matrix<T>::getCols() const {
     return COLS;
-}
-
-template <typename T>
-void Matrix<T>::setRow(unsigned long row, const vector<T>& values) {
-    if (row < 0 || row >= ROWS) {
-        throw MatrixException("Row index out of bounds.");
-    }
-
-    if (values.size() != COLS) {
-        throw MatrixException("The vector size must be equal to the number columns.");
-    }
-    
-    for (unsigned long i = 0; i < COLS; ++i) {
-        data[row][i] = values[i];
-    }
-}
-
-template <typename T>
-void Matrix<T>::setCol(unsigned long col, const vector<T>& values) {
-    if (col < 0 || col >= COLS) {
-        throw MatrixException("Column index out of bounds.");
-    }
-
-    if (values.size() != ROWS) {
-        throw MatrixException("The vector size must be equal to the number rows.");
-    }
-
-    for (unsigned long i = 0; i < ROWS; ++i) {
-        data[i][col] = values[i];
-    }
-}
-
-template <typename T>
-vector<T> Matrix<T>::getRow(unsigned long row) const {
-    if (row < 0 || row >= ROWS) {
-        throw MatrixException("Row index out of bounds.");
-    }
-    
-    return vector<T>(data[row], data[row] + COLS);
-}
-
-template <typename T>
-vector<T> Matrix<T>::getCol(unsigned long col) const {
-    if (col < 0 || col >= COLS) {
-        throw MatrixException("Column index out of bounds.");
-    }
-    
-    vector<T> result(ROWS);
-    for (unsigned long i = 0; i < ROWS; ++i) {
-        result[i] = data[i][col];
-    }
-    
-    return result;
 }
 
 template <typename T>

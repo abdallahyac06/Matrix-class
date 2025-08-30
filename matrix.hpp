@@ -1,8 +1,8 @@
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
 
-#include <iostream>
 #include <vector>
+#include <iostream>
 #include <stdexcept>
 
 using std::vector;
@@ -35,10 +35,6 @@ class Matrix {
 
         unsigned long getRows() const;
         unsigned long getCols() const;
-        void setRow(unsigned long row, const vector<T>& values);
-        void setCol(unsigned long col, const vector<T>& values);
-        vector<T> getRow(unsigned long row) const;
-        vector<T> getCol(unsigned long col) const;
         bool isZeroRow(unsigned long row) const;
         bool isZeroCol(unsigned long col) const;
         unsigned long rank() const;

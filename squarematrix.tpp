@@ -1,4 +1,12 @@
 #include "squarematrix.hpp"
+#include <vector>
+#include <iostream>
+
+using std::ostream;
+using std::istream;
+
+using std::move;
+using std::swap;
 
 template <typename T>
 SquareMatrix<T>::SquareMatrix(unsigned long size, const T& zero) : Matrix<T>(size, size, zero) {}
