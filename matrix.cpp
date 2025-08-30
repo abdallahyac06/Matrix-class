@@ -1,11 +1,19 @@
 #include "matrix.h"
-#include <iomanip>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
 #include <sstream>
+#include <iomanip>
+
+using std::string;
+using std::runtime_error;
+using std::stringstream;
+using std::ostream;
+using std::istream;
 
 using std::move;
-using std::stringstream;
-using std::swap;
 using std::max;
+using std::swap;
 using std::setw;
 using std::endl;
 
@@ -92,55 +100,6 @@ unsigned long Matrix::getRows() const {
 
 unsigned long Matrix::getCols() const {
     return COLS;
-}
-
-void Matrix::setRow(unsigned long row, const vector<double>& values) {
-    if (row < 0 || row >= ROWS) {
-        throw MatrixException("Row index out of bounds.");
-    }
-
-    if (values.size() != COLS) {
-        throw MatrixException("The vector size must be equal to the number columns.");
-    }
-    
-    for (unsigned long i = 0; i < COLS; ++i) {
-        data[row][i] = values[i];
-    }
-}
-
-void Matrix::setCol(unsigned long col, const vector<double>& values) {
-    if (col < 0 || col >= COLS) {
-        throw MatrixException("Column index out of bounds.");
-    }
-
-    if (values.size() != ROWS) {
-        throw MatrixException("The vector size must be equal to the number rows.");
-    }
-
-    for (unsigned long i = 0; i < ROWS; ++i) {
-        data[i][col] = values[i];
-    }
-}
-
-vector<double> Matrix::getRow(unsigned long row) const {
-    if (row < 0 || row >= ROWS) {
-        throw MatrixException("Row index out of bounds.");
-    }
-
-    return vector<double>(data[row], data[row] + COLS);
-}
-
-vector<double> Matrix::getCol(unsigned long col) const {
-    if (col < 0 || col >= COLS) {
-        throw MatrixException("Column index out of bounds.");
-    }
-    
-    vector<double> result(ROWS);
-    for (unsigned long i = 0; i < ROWS; ++i) {
-        result[i] = data[i][col];
-    }
-    
-    return result;
 }
 
 bool Matrix::isZeroRow(unsigned long row) const {
@@ -411,10 +370,6 @@ Matrix::operator bool() const {
     
     return false;
 }
-    
-Matrix operator*(double scalar, const Matrix& matrix) {
-    return matrix * scalar;
-}
 
 ostream& operator<<(ostream& os, const Matrix& matrix) {
     unsigned long maxl = 1 + matrix.maxLength();
@@ -436,4 +391,8 @@ istream& operator>>(istream& is, Matrix& matrix) {
     }
     
     return is;
+}
+
+Matrix operator*(double scalar, const Matrix& matrix) {
+    return matrix * scalar;
 }

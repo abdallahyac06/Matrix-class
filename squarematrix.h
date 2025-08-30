@@ -2,6 +2,10 @@
 #define SQUAREMATRIX_H
 
 #include "matrix.h"
+#include <iostream>
+
+using std::ostream;
+using std::istream;
 
 class SquareMatrix : public Matrix {
     private:
@@ -44,5 +48,9 @@ class SquareMatrix : public Matrix {
         SquareMatrix adjoint() const;
         SquareMatrix inverse() const;
 };
+
+ostream& operator<<(ostream& os, const SquareMatrix& matrix);
+istream& operator>>(istream& is, SquareMatrix& matrix);
+SquareMatrix operator*(double scalar, const SquareMatrix& matrix);
 
 #endif

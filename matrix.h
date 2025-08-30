@@ -1,8 +1,8 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#include <iostream>
 #include <vector>
+#include <iostream>
 #include <stdexcept>
 
 using std::vector;
@@ -12,11 +12,9 @@ using std::runtime_error;
 using std::string;
 
 class Matrix {
-    private:
+    protected:
         const unsigned long ROWS;
         const unsigned long COLS;
-        
-    protected:
         vector<double*> data;
         size_t maxLength() const;
         void setRow(unsigned long row, const double* values);
@@ -33,10 +31,6 @@ class Matrix {
 
         unsigned long getRows() const;
         unsigned long getCols() const;
-        void setRow(unsigned long row, const vector<double>& values);
-        void setCol(unsigned long col, const vector<double>& values);
-        vector<double> getRow(unsigned long row) const;
-        vector<double> getCol(unsigned long col) const;
         bool isZeroRow(unsigned long row) const;
         bool isZeroCol(unsigned long col) const;
         unsigned long rank() const;
@@ -63,10 +57,11 @@ class Matrix {
         const double* operator[](unsigned long row) const;
         operator bool() const;
         
-    friend Matrix operator*(double scalar, const Matrix& matrix);
     friend ostream& operator<<(ostream& os, const Matrix& matrix); 
     friend istream& operator>>(istream& is, Matrix& matrix);
 };
+
+Matrix operator*(double scalar, const Matrix& matrix);
 
 class MatrixException : public runtime_error {
     public:
