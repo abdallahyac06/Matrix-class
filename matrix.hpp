@@ -68,6 +68,9 @@ class Matrix {
     friend istream& operator>>(istream& is, Matrix<U>& matrix);
 };
 
+template <typename T>
+ostream& operator<<(ostream& os, const Matrix<T>& matrix);
+
 class MatrixException : public runtime_error {
     public:
         explicit MatrixException(const string& message);

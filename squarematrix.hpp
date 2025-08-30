@@ -50,6 +50,13 @@ class SquareMatrix : public Matrix<T> {
         SquareMatrix<T> inverse() const;
 };
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const SquareMatrix<T>& matrix);
+template <typename T>
+std::istream& operator>>(std::istream& is, SquareMatrix<T>& matrix);
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const SquareMatrix<T>& matrix);
+
 #include "squarematrix.tpp"
 
 #endif

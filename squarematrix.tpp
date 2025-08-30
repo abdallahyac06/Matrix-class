@@ -317,11 +317,6 @@ SquareMatrix<T> SquareMatrix<T>::inverse() const {
 }
 
 template <typename T>
-SquareMatrix<T> operator*(T scalar, const SquareMatrix<T>& matrix) {
-    return matrix * scalar;
-}
-
-template <typename T>
 ostream& operator<<(ostream& os, const SquareMatrix<T>& matrix) {
     return os << Matrix<T>(matrix);
 }
@@ -329,4 +324,9 @@ ostream& operator<<(ostream& os, const SquareMatrix<T>& matrix) {
 template <typename T>
 istream& operator>>(istream& is, SquareMatrix<T>& matrix) {
     return is >> static_cast<Matrix<T>&>(matrix);
+}
+    
+template <typename T>
+SquareMatrix<T> operator*(T scalar, const SquareMatrix<T>& matrix) {
+    return matrix * scalar;
 }

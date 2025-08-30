@@ -408,11 +408,6 @@ Matrix<T>::operator bool() const {
 }
 
 template <typename T>
-Matrix<T> operator*(T scalar, const Matrix<T>& matrix) {
-    return matrix * scalar;
-}
-
-template <typename T>
 ostream& operator<<(ostream& os, const Matrix<T>& matrix) {
     unsigned long maxl = 1 + matrix.maxLength();
     for (const T* row: matrix.data) {
@@ -434,4 +429,9 @@ istream& operator>>(istream& is, Matrix<T>& matrix) {
     }
 
     return is;
+}
+
+template <typename T>
+Matrix<T> operator*(T scalar, const Matrix<T>& matrix) {
+    return matrix * scalar;
 }
