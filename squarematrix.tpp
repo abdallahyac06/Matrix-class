@@ -123,6 +123,12 @@ SquareMatrix<T>& SquareMatrix<T>::operator=(const SquareMatrix<T>& other) {
 }
 
 template <typename T>
+SquareMatrix<T>& SquareMatrix<T>::operator=(SquareMatrix<T>&& other) {
+    Matrix<T>::operator=(move(other));
+    return *this;
+}
+
+template <typename T>
 SquareMatrix<T> SquareMatrix<T>::operator+(const Matrix<T>& other) const {
     return SquareMatrix<T>(Matrix<T>::operator+(other));
 }

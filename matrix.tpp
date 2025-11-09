@@ -37,10 +37,7 @@ template <typename T>
 Matrix<T>::Matrix(const Matrix<T>& other): Matrix(other.data.data(), other.ROWS, other.COLS, other.ZERO) {}
 
 template <typename T>
-Matrix<T>::Matrix(Matrix<T>&& other): ROWS(other.ROWS), COLS(other.COLS), ZERO(other.ZERO) {
-    data = move(other.data);
-    other.data.assign(ROWS, nullptr);
-}
+Matrix<T>::Matrix(Matrix<T>&& other): ROWS(other.ROWS), COLS(other.COLS), ZERO(other.ZERO), data(move(other.data)) {}
 
 template <typename T>
 Matrix<T>::Matrix(const T* const* values, unsigned long rows, unsigned long cols, const T& zero): Matrix(rows, cols, zero) {
@@ -240,6 +237,24 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& other) {
         setRow(i, other[i]);
     }
     
+    return *this;
+}
+
+template <typename T>
+Matrix<T>& Matrix<T>::operator=(Matrix<T>&& other) {
+    if (&other == *this) {
+        return *this;
+    }
+
+    if (ROWS != other.ROWS || COLS != other.COLS) {
+        throw MatrixException("Matrix dimensions must match for assignment.");
+    }
+
+    for (T*& row: data) {
+        delete[] row;
+    }
+
+    data = move(other.data);
     return *this;
 }
 
