@@ -112,6 +112,11 @@ SquareMatrix& SquareMatrix::operator=(const SquareMatrix& other) {
     return *this;
 }
 
+SquareMatrix& SquareMatrix::operator=(SquareMatrix&& other) {
+    Matrix::operator=(std::move(other));
+    return *this;
+}
+
 SquareMatrix SquareMatrix::operator+(const Matrix& other) const {
     return SquareMatrix(Matrix::operator+(other));
 }

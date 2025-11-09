@@ -34,10 +34,7 @@ Matrix::Matrix(unsigned long rows, unsigned long cols): ROWS(rows), COLS(cols), 
 
 Matrix::Matrix(const Matrix& other): Matrix(other.data.data(), other.ROWS, other.COLS) {}
 
-Matrix::Matrix(Matrix&& other): ROWS(other.ROWS), COLS(other.COLS) {
-    data = move(other.data);
-    other.data.assign(ROWS, nullptr);
-}
+Matrix::Matrix(Matrix&& other): ROWS(other.ROWS), COLS(other.COLS), data(move(other.data)) {}
 
 Matrix::Matrix(const double* const* values, unsigned long rows, unsigned long cols): Matrix(rows, cols) {
     for (unsigned long i = 0; i < ROWS; ++i) {
@@ -221,6 +218,23 @@ Matrix& Matrix::operator=(const Matrix& other) {
         setRow(i, other[i]);
     }
     
+    return *this;
+}
+
+Matrix& Matrix::operator=(Matrix&& other) {
+    if (&other == this) {
+        return *this;
+    }
+
+    if (ROWS != other.ROWS || COLS != other.COLS) {
+        throw MatrixException("Matrix dimensions must match for assignment.");
+    }
+
+    for (double*& row: data) {
+        delete[] row;
+    }
+
+    data = std::move(other.data);
     return *this;
 }
 

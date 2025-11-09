@@ -24,6 +24,7 @@ class SquareMatrix : public Matrix {
         SquareMatrix ref() const;
         SquareMatrix rref() const;
         SquareMatrix& operator=(const SquareMatrix& other);
+        SquareMatrix& operator=(SquareMatrix&& other);
         SquareMatrix operator+(const Matrix& other) const;
         SquareMatrix operator-(const Matrix& other) const;
         SquareMatrix operator-() const;
