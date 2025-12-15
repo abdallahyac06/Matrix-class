@@ -1,33 +1,32 @@
 #include "squarematrix.h"
-#include <vector>
 #include <iostream>
+#include <vector>
 
-using std::ostream;
 using std::istream;
+using std::ostream;
 
 using std::move;
 using std::swap;
 
+SquareMatrix::SquareMatrix(unsigned long size) : Matrix(size, size) {}
 
-SquareMatrix::SquareMatrix(unsigned long size): Matrix(size, size) {}
+SquareMatrix::SquareMatrix(const SquareMatrix &other) : Matrix(other) {}
 
-SquareMatrix::SquareMatrix(const SquareMatrix& other): Matrix(other) {}
+SquareMatrix::SquareMatrix(SquareMatrix &&other) : Matrix(move(other)) {}
 
-SquareMatrix::SquareMatrix(SquareMatrix&& other): Matrix(move(other)) {}
-
-SquareMatrix::SquareMatrix(const Matrix& other): Matrix(other) {
+SquareMatrix::SquareMatrix(const Matrix &other) : Matrix(other) {
     if (ROWS != COLS) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
-SquareMatrix::SquareMatrix(Matrix&& other): Matrix(move(other)) {
+SquareMatrix::SquareMatrix(Matrix &&other) : Matrix(move(other)) {
     if (ROWS != COLS) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
-SquareMatrix::SquareMatrix(const double* const* values, unsigned long size): Matrix(values, size, size) {}
+SquareMatrix::SquareMatrix(const double *const *values, unsigned long size) : Matrix(values, size, size) {}
 
 double SquareMatrix::determinantRecursive() {
     if (ROWS == 1) {
@@ -48,7 +47,7 @@ double SquareMatrix::determinantRecursive() {
         }
     }
 
-    return (r & 1 ? -data[r][0]: data[r][0]) * operator()(r, 0).determinantRecursive();
+    return (r & 1 ? -data[r][0] : data[r][0]) * operator()(r, 0).determinantRecursive();
 }
 
 SquareMatrix SquareMatrix::transpose() const {
@@ -77,7 +76,7 @@ SquareMatrix SquareMatrix::ref() const {
         }
         r = ++c;
     }
-    
+
     return result;
 }
 
@@ -107,21 +106,21 @@ SquareMatrix SquareMatrix::rref() const {
     return result;
 }
 
-SquareMatrix& SquareMatrix::operator=(const SquareMatrix& other) {
+SquareMatrix &SquareMatrix::operator=(const SquareMatrix &other) {
     Matrix::operator=(other);
     return *this;
 }
 
-SquareMatrix& SquareMatrix::operator=(SquareMatrix&& other) {
+SquareMatrix &SquareMatrix::operator=(SquareMatrix &&other) {
     Matrix::operator=(std::move(other));
     return *this;
 }
 
-SquareMatrix SquareMatrix::operator+(const Matrix& other) const {
+SquareMatrix SquareMatrix::operator+(const Matrix &other) const {
     return SquareMatrix(Matrix::operator+(other));
 }
 
-SquareMatrix SquareMatrix::operator-(const Matrix& other) const {
+SquareMatrix SquareMatrix::operator-(const Matrix &other) const {
     return SquareMatrix(Matrix::operator-(other));
 }
 
@@ -129,11 +128,11 @@ SquareMatrix SquareMatrix::operator-() const {
     return SquareMatrix(Matrix::operator-());
 }
 
-SquareMatrix SquareMatrix::operator*(const SquareMatrix& other) const {
+SquareMatrix SquareMatrix::operator*(const SquareMatrix &other) const {
     return SquareMatrix(Matrix::operator*(other));
 }
 
-Matrix SquareMatrix::operator*(const Matrix& other) const {
+Matrix SquareMatrix::operator*(const Matrix &other) const {
     return Matrix::operator*(other);
 }
 
@@ -145,23 +144,23 @@ SquareMatrix SquareMatrix::operator/(double scalar) const {
     return SquareMatrix(Matrix::operator/(scalar));
 }
 
-SquareMatrix& SquareMatrix::operator+=(const Matrix& other) {
+SquareMatrix &SquareMatrix::operator+=(const Matrix &other) {
     return operator=(operator+(other));
 }
 
-SquareMatrix& SquareMatrix::operator-=(const Matrix& other) {
+SquareMatrix &SquareMatrix::operator-=(const Matrix &other) {
     return operator=(operator-(other));
 }
 
-SquareMatrix& SquareMatrix::operator*=(const Matrix& other) {
+SquareMatrix &SquareMatrix::operator*=(const Matrix &other) {
     return operator=(operator*(other));
 }
 
-SquareMatrix& SquareMatrix::operator*=(double scalar) {
+SquareMatrix &SquareMatrix::operator*=(double scalar) {
     return operator=(operator*(scalar));
 }
 
-SquareMatrix& SquareMatrix::operator/=(double scalar) {
+SquareMatrix &SquareMatrix::operator/=(double scalar) {
     return operator=(operator/(scalar));
 }
 
@@ -286,14 +285,14 @@ SquareMatrix SquareMatrix::inverse() const {
     return result;
 }
 
-ostream& operator<<(ostream& os, const SquareMatrix& matrix) {
+ostream &operator<<(ostream &os, const SquareMatrix &matrix) {
     return os << static_cast<Matrix>(matrix);
 }
 
-istream& operator>>(istream& is, SquareMatrix& matrix) {
-    return is >> static_cast<Matrix&>(matrix);
+istream &operator>>(istream &is, SquareMatrix &matrix) {
+    return is >> static_cast<Matrix &>(matrix);
 }
 
-SquareMatrix operator*(double scalar, const SquareMatrix& matrix) {
+SquareMatrix operator*(double scalar, const SquareMatrix &matrix) {
     return SquareMatrix(matrix * scalar);
 }
