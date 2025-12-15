@@ -1,31 +1,30 @@
-#include "matrix.hpp"
-#include <vector>
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
 #include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <vector>
 
-using std::string;
-using std::runtime_error;
-using std::stringstream;
-using std::ostream;
 using std::istream;
+using std::ostream;
+using std::runtime_error;
+using std::string;
+using std::stringstream;
 
-using std::move;
-using std::max;
-using std::swap;
-using std::setw;
 using std::endl;
+using std::max;
+using std::move;
+using std::setw;
+using std::swap;
 
-MatrixException::MatrixException(const string& message): runtime_error(message) {}
+MatrixException::MatrixException(const string &message) : runtime_error(message) {}
 
 template <typename T>
-Matrix<T>::Matrix(unsigned long rows, unsigned long cols, const T& zero): ROWS(rows), COLS(cols), ZERO(zero), data(ROWS, nullptr) {
+Matrix<T>::Matrix(unsigned long rows, unsigned long cols, const T &zero) : ROWS(rows), COLS(cols), ZERO(zero), data(ROWS, nullptr) {
     if (ROWS < 1 || COLS < 1) {
         throw MatrixException("Matrix dimensions must be greater than 0.");
     }
-    
-    for (T*& row: data) {
+
+    for (T *&row : data) {
         row = new T[COLS];
         for (unsigned long i = 0; i < COLS; ++i) {
             row[i] = ZERO;
@@ -34,13 +33,13 @@ Matrix<T>::Matrix(unsigned long rows, unsigned long cols, const T& zero): ROWS(r
 }
 
 template <typename T>
-Matrix<T>::Matrix(const Matrix<T>& other): Matrix(other.data.data(), other.ROWS, other.COLS, other.ZERO) {}
+Matrix<T>::Matrix(const Matrix<T> &other) : Matrix(other.data.data(), other.ROWS, other.COLS, other.ZERO) {}
 
 template <typename T>
-Matrix<T>::Matrix(Matrix<T>&& other): ROWS(other.ROWS), COLS(other.COLS), ZERO(other.ZERO), data(move(other.data)) {}
+Matrix<T>::Matrix(Matrix<T> &&other) : ROWS(other.ROWS), COLS(other.COLS), ZERO(other.ZERO), data(move(other.data)) {}
 
 template <typename T>
-Matrix<T>::Matrix(const T* const* values, unsigned long rows, unsigned long cols, const T& zero): Matrix(rows, cols, zero) {
+Matrix<T>::Matrix(const T *const *values, unsigned long rows, unsigned long cols, const T &zero) : Matrix(rows, cols, zero) {
     for (unsigned long i = 0; i < ROWS; ++i) {
         setRow(i, values[i]);
     }
@@ -48,7 +47,7 @@ Matrix<T>::Matrix(const T* const* values, unsigned long rows, unsigned long cols
 
 template <typename T>
 Matrix<T>::~Matrix() {
-    for (T*& row: data) {
+    for (T *&row : data) {
         delete[] row;
         row = nullptr;
     }
@@ -58,23 +57,23 @@ template <typename T>
 size_t Matrix<T>::maxLength() const {
     size_t maxl = 0;
     stringstream ss;
-    for (const T* row: data) {
+    for (const T *row : data) {
         for (unsigned long i = 0; i < COLS; ++i) {
             ss.str("");
             ss << row[i];
             maxl = max(maxl, ss.str().length());
         }
     }
-    
+
     return maxl;
 }
 
 template <typename T>
-void Matrix<T>::setRow(unsigned long row, const T* values) {
+void Matrix<T>::setRow(unsigned long row, const T *values) {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
-    
+
     for (unsigned long i = 0; i < COLS; ++i) {
         data[row][i] = values[i];
     }
@@ -116,13 +115,13 @@ bool Matrix<T>::isZeroRow(unsigned long row) const {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
-    
+
     for (unsigned long i = 0; i < COLS; ++i) {
         if (data[row][i] != ZERO) {
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -132,12 +131,12 @@ bool Matrix<T>::isZeroCol(unsigned long col) const {
         throw MatrixException("Column index out of bounds.");
     }
 
-    for (const T* row: data) {
+    for (const T *row : data) {
         if (row[col] != ZERO) {
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -161,7 +160,7 @@ Matrix<T> Matrix<T>::transpose() const {
             result[j][i] = data[i][j];
         }
     }
-    
+
     return result;
 }
 
@@ -190,7 +189,7 @@ Matrix<T> Matrix<T>::ref() const {
         r = ++r0;
         ++c;
     }
-    
+
     return result;
 }
 
@@ -224,7 +223,7 @@ Matrix<T> Matrix<T>::rref() const {
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator=(const Matrix<T>& other) {
+Matrix<T> &Matrix<T>::operator=(const Matrix<T> &other) {
     if (&other == this) {
         return *this;
     }
@@ -236,12 +235,12 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& other) {
     for (unsigned long i = 0; i < ROWS; ++i) {
         setRow(i, other[i]);
     }
-    
+
     return *this;
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator=(Matrix<T>&& other) {
+Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) {
     if (&other == *this) {
         return *this;
     }
@@ -250,7 +249,7 @@ Matrix<T>& Matrix<T>::operator=(Matrix<T>&& other) {
         throw MatrixException("Matrix dimensions must match for assignment.");
     }
 
-    for (T*& row: data) {
+    for (T *&row : data) {
         delete[] row;
     }
 
@@ -259,7 +258,7 @@ Matrix<T>& Matrix<T>::operator=(Matrix<T>&& other) {
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T>& other) const {
+Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw MatrixException("Matrix dimensions must match for addition.");
     }
@@ -270,12 +269,12 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T>& other) const {
             result[i][j] = data[i][j] + other[i][j];
         }
     }
-    
+
     return result;
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const {
+Matrix<T> Matrix<T>::operator-(const Matrix<T> &other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         throw MatrixException("Matrix dimensions must match for subtraction.");
     }
@@ -286,7 +285,7 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const {
             result[i][j] = data[i][j] - other[i][j];
         }
     }
-    
+
     return result;
 }
 
@@ -298,12 +297,12 @@ Matrix<T> Matrix<T>::operator-() const {
             result[i][j] = -data[i][j];
         }
     }
-    
+
     return result;
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T>& other) const {
+Matrix<T> Matrix<T>::operator*(const Matrix<T> &other) const {
     if (COLS != other.ROWS) {
         throw MatrixException("Number of columns in the first matrix must match the number of rows in the second matrix for multiplication.");
     }
@@ -327,7 +326,7 @@ Matrix<T> Matrix<T>::operator*(T scalar) const {
     for (unsigned long i = 0; i < ROWS; ++i) {
         result.multiplyRow(i, scalar);
     }
-    
+
     return result;
 }
 
@@ -337,37 +336,37 @@ Matrix<T> Matrix<T>::operator/(T scalar) const {
     for (unsigned long i = 0; i < ROWS; ++i) {
         result.divideRow(i, scalar);
     }
-    
+
     return result;
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& other) {
+Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &other) {
     return operator=(operator+(other));
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& other) {
+Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &other) {
     return operator=(operator-(other));
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator*=(const Matrix<T>& other) {
+Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &other) {
     return operator=(operator*(other));
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator*=(T scalar) {
+Matrix<T> &Matrix<T>::operator*=(T scalar) {
     return operator=(operator*(scalar));
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator/=(T scalar) {
+Matrix<T> &Matrix<T>::operator/=(T scalar) {
     return operator=(operator/(scalar));
 }
 
 template <typename T>
-bool Matrix<T>::operator==(const Matrix<T>& other) const {
+bool Matrix<T>::operator==(const Matrix<T> &other) const {
     if (ROWS != other.ROWS || COLS != other.COLS) {
         return false;
     }
@@ -379,12 +378,12 @@ bool Matrix<T>::operator==(const Matrix<T>& other) const {
             }
         }
     }
-    
+
     return true;
 }
 
 template <typename T>
-bool Matrix<T>::operator!=(const Matrix<T>& other) const {
+bool Matrix<T>::operator!=(const Matrix<T> &other) const {
     return !(operator==(other));
 }
 
@@ -394,20 +393,20 @@ bool Matrix<T>::operator!() const {
 }
 
 template <typename T>
-T*& Matrix<T>::operator[](unsigned long row) {
+T *&Matrix<T>::operator[](unsigned long row) {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
-    
+
     return data[row];
 }
 
 template <typename T>
-const T* Matrix<T>::operator[](unsigned long row) const {
+const T *Matrix<T>::operator[](unsigned long row) const {
     if (row < 0 || row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
-    
+
     return data[row];
 }
 
@@ -418,14 +417,14 @@ Matrix<T>::operator bool() const {
             return true;
         }
     }
-    
+
     return false;
 }
 
 template <typename T>
-ostream& operator<<(ostream& os, const Matrix<T>& matrix) {
+ostream &operator<<(ostream &os, const Matrix<T> &matrix) {
     unsigned long maxl = 1 + matrix.maxLength();
-    for (const T* row: matrix.data) {
+    for (const T *row : matrix.data) {
         for (unsigned long i = 0; i < matrix.COLS; ++i) {
             os << setw(maxl) << row[i];
         }
@@ -436,8 +435,8 @@ ostream& operator<<(ostream& os, const Matrix<T>& matrix) {
 }
 
 template <typename T>
-istream& operator>>(istream& is, Matrix<T>& matrix) {
-    for (T* row: matrix.data) {
+istream &operator>>(istream &is, Matrix<T> &matrix) {
+    for (T *row : matrix.data) {
         for (unsigned long i = 0; i < matrix.COLS; ++i) {
             is >> row[i];
         }
@@ -447,6 +446,6 @@ istream& operator>>(istream& is, Matrix<T>& matrix) {
 }
 
 template <typename T>
-Matrix<T> operator*(T scalar, const Matrix<T>& matrix) {
+Matrix<T> operator*(T scalar, const Matrix<T> &matrix) {
     return matrix * scalar;
 }

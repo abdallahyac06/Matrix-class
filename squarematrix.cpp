@@ -1,38 +1,37 @@
-#include "squarematrix.hpp"
-#include <vector>
 #include <iostream>
+#include <vector>
 
-using std::ostream;
 using std::istream;
+using std::ostream;
 
 using std::move;
 using std::swap;
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(unsigned long size, const T& zero) : Matrix<T>(size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(unsigned long size, const T &zero) : Matrix<T>(size, size, zero) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const SquareMatrix<T>& other) : Matrix<T>(other) {}
+SquareMatrix<T>::SquareMatrix(const SquareMatrix<T> &other) : Matrix<T>(other) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(SquareMatrix<T>&& other) : Matrix<T>(move(other)) {}
+SquareMatrix<T>::SquareMatrix(SquareMatrix<T> &&other) : Matrix<T>(move(other)) {}
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const Matrix<T>& other) : Matrix<T>(other) {
+SquareMatrix<T>::SquareMatrix(const Matrix<T> &other) : Matrix<T>(other) {
     if (this->ROWS != this->COLS) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(Matrix<T>&& other) : Matrix<T>(move(other)) {
+SquareMatrix<T>::SquareMatrix(Matrix<T> &&other) : Matrix<T>(move(other)) {
     if (this->ROWS != this->COLS) {
         throw MatrixException("Matrix is not square.");
     }
 }
 
 template <typename T>
-SquareMatrix<T>::SquareMatrix(const T* const* values, unsigned long size, const T& zero) : Matrix<T>(values, size, size, zero) {}
+SquareMatrix<T>::SquareMatrix(const T *const *values, unsigned long size, const T &zero) : Matrix<T>(values, size, size, zero) {}
 
 template <typename T>
 T SquareMatrix<T>::determinantRecursive() {
@@ -85,7 +84,7 @@ SquareMatrix<T> SquareMatrix<T>::ref() const {
         }
         r = ++c;
     }
-    
+
     return result;
 }
 
@@ -117,24 +116,24 @@ SquareMatrix<T> SquareMatrix<T>::rref() const {
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator=(const SquareMatrix<T>& other) {
+SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &other) {
     Matrix<T>::operator=(other);
     return *this;
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator=(SquareMatrix<T>&& other) {
+SquareMatrix<T> &SquareMatrix<T>::operator=(SquareMatrix<T> &&other) {
     Matrix<T>::operator=(move(other));
     return *this;
 }
 
 template <typename T>
-SquareMatrix<T> SquareMatrix<T>::operator+(const Matrix<T>& other) const {
+SquareMatrix<T> SquareMatrix<T>::operator+(const Matrix<T> &other) const {
     return SquareMatrix<T>(Matrix<T>::operator+(other));
 }
 
 template <typename T>
-SquareMatrix<T> SquareMatrix<T>::operator-(const Matrix<T>& other) const {
+SquareMatrix<T> SquareMatrix<T>::operator-(const Matrix<T> &other) const {
     return SquareMatrix<T>(Matrix<T>::operator-(other));
 }
 
@@ -144,12 +143,12 @@ SquareMatrix<T> SquareMatrix<T>::operator-() const {
 }
 
 template <typename T>
-SquareMatrix<T> SquareMatrix<T>::operator*(const SquareMatrix<T>& other) const {
+SquareMatrix<T> SquareMatrix<T>::operator*(const SquareMatrix<T> &other) const {
     return SquareMatrix<T>(Matrix<T>::operator*(other));
 }
 
 template <typename T>
-Matrix<T> SquareMatrix<T>::operator*(const Matrix<T>& other) const {
+Matrix<T> SquareMatrix<T>::operator*(const Matrix<T> &other) const {
     return Matrix<T>::operator*(other);
 }
 
@@ -164,27 +163,27 @@ SquareMatrix<T> SquareMatrix<T>::operator/(T scalar) const {
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator+=(const Matrix<T>& other) {
+SquareMatrix<T> &SquareMatrix<T>::operator+=(const Matrix<T> &other) {
     return operator=(operator+(other));
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator-=(const Matrix<T>& other) {
+SquareMatrix<T> &SquareMatrix<T>::operator-=(const Matrix<T> &other) {
     return operator=(operator-(other));
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator*=(const Matrix<T>& other) {
+SquareMatrix<T> &SquareMatrix<T>::operator*=(const Matrix<T> &other) {
     return operator=(operator*(other));
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator*=(T scalar) {
+SquareMatrix<T> &SquareMatrix<T>::operator*=(T scalar) {
     return operator=(operator*(scalar));
 }
 
 template <typename T>
-SquareMatrix<T>& SquareMatrix<T>::operator/=(T scalar) {
+SquareMatrix<T> &SquareMatrix<T>::operator/=(T scalar) {
     return operator=(operator/(scalar));
 }
 
@@ -266,14 +265,14 @@ SquareMatrix<T> SquareMatrix<T>::operator()(unsigned long row, unsigned long col
     if (col < 0 || col >= this->COLS) {
         throw MatrixException("Column index out of bounds.");
     }
-    
+
     SquareMatrix<T> result(this->ROWS - 1);
     for (unsigned long i = 0; i < this->ROWS - 1; ++i) {
         for (unsigned long j = 0; j < this->COLS - 1; ++j) {
             result[i][j] = this->data[i + (i >= row)][j + (j >= col)];
         }
     }
-    
+
     return result;
 }
 
@@ -323,16 +322,16 @@ SquareMatrix<T> SquareMatrix<T>::inverse() const {
 }
 
 template <typename T>
-ostream& operator<<(ostream& os, const SquareMatrix<T>& matrix) {
+ostream &operator<<(ostream &os, const SquareMatrix<T> &matrix) {
     return os << Matrix<T>(matrix);
 }
 
 template <typename T>
-istream& operator>>(istream& is, SquareMatrix<T>& matrix) {
-    return is >> static_cast<Matrix<T>&>(matrix);
+istream &operator>>(istream &is, SquareMatrix<T> &matrix) {
+    return is >> static_cast<Matrix<T> &>(matrix);
 }
-    
+
 template <typename T>
-SquareMatrix<T> operator*(T scalar, const SquareMatrix<T>& matrix) {
+SquareMatrix<T> operator*(T scalar, const SquareMatrix<T> &matrix) {
     return matrix * scalar;
 }
