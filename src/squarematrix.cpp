@@ -227,11 +227,11 @@ bool SquareMatrix::isSymmetric() const {
 }
 
 SquareMatrix SquareMatrix::operator()(unsigned long row, unsigned long col) const {
-    if (row < 0 || row >= ROWS) {
+    if (row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
 
-    if (col < 0 || col >= COLS) {
+    if (col >= COLS) {
         throw MatrixException("Column index out of bounds.");
     }
 

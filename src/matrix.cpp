@@ -64,7 +64,7 @@ size_t Matrix::maxLength() const {
 }
 
 void Matrix::setRow(unsigned long row, const double *values) {
-    if (row < 0 || row >= ROWS) {
+    if (row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
 
@@ -100,7 +100,7 @@ unsigned long Matrix::getCols() const {
 }
 
 bool Matrix::isZeroRow(unsigned long row) const {
-    if (row < 0 || row >= ROWS) {
+    if (row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
 
@@ -114,7 +114,7 @@ bool Matrix::isZeroRow(unsigned long row) const {
 }
 
 bool Matrix::isZeroCol(unsigned long col) const {
-    if (col < 0 || col >= COLS) {
+    if (col >= COLS) {
         throw MatrixException("Column index out of bounds.");
     }
 
@@ -360,7 +360,7 @@ bool Matrix::operator!() const {
 }
 
 double *&Matrix::operator[](unsigned long row) {
-    if (row < 0 || row >= ROWS) {
+    if (row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
 
@@ -368,7 +368,7 @@ double *&Matrix::operator[](unsigned long row) {
 }
 
 const double *Matrix::operator[](unsigned long row) const {
-    if (row < 0 || row >= ROWS) {
+    if (row >= ROWS) {
         throw MatrixException("Row index out of bounds.");
     }
 
